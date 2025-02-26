@@ -14,7 +14,7 @@ _LOGGER = logging.getLogger(__name__)
 DEFAULT_NAME = "Google pollen"
 DEFAULT_LANGUAGE = "en"  
 BASE_URL = "https://pollen.googleapis.com/v1/forecast:lookup"
-SCAN_INTERVAL = timedelta(hours=6)
+SCAN_INTERVAL = timedelta(hours=4)
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_API_KEY): cv.string,
