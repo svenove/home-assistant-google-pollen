@@ -31,8 +31,8 @@ sensor:
     api_key: YOUR_API_KEY
     latitude: YOUR_LATITUDE
     longitude: YOUR_LONGITUDE
-    name: Custom Sensor Name (Optional)
-    language: en (Optional)
+    name: Custom Sensor Name #(Optional)
+    language: "en" #(Optional)
 ```
 
 - `api_key`: Your API key for the Google Pollen API.
