@@ -72,4 +72,4 @@ You are bound by Google’s [Terms of Service](http://www.google.com/intl/en/pol
 
 This custom component uses the Google Maps API, see [Google Privacy Policy](https://www.google.com/policies/privacy/).
 
-<img src="google-logo.png" alt="Google logo" />
+![Google logo](google-logo.png)
