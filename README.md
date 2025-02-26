@@ -2,7 +2,7 @@
 
 A Home Assistant custom component to fetch pollen data from the Google Pollen API. 
 
-<img src="screenshot.png" alt="screenshot" width="400px" />
+![screenshot](screenshot.png)
 
 ## Installation
 
