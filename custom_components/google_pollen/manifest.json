@@ -4,7 +4,7 @@
   "codeowners": ["@svenove"],
   "dependencies": [],
   "documentation": "https://github.com/svenove/home-assistant-google-pollen",
-  "integration_type": "service",
+  "integration_type": "device",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/svenove/home-assistant-google-pollen/issues",
   "requirements": ["requests", "voluptuous"],
