@@ -91,6 +91,15 @@ class GooglePollenSensor(Entity):
                 for plant in plant_info:
                     if plant["code"] == self._pollen_type and "indexInfo" in plant:
                         pollen_values[i] = plant["indexInfo"].get("value", 0)
+                        _LOGGER.debug(
+                            "Code %s got displayName %s, with values %d / %d / %d / %d",
+                            code,
+                            display_name,
+                            pollen_values[code][0],
+                            pollen_values[code][1],
+                            pollen_values[code][2],
+                            pollen_values[code][3],
+                        )
 
             self._attributes = {
                 "tomorrow": pollen_values[1],
