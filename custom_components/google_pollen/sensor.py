@@ -1,7 +1,7 @@
 import logging
 import requests
 import voluptuous as vol
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import CONF_API_KEY, CONF_NAME, CONF_LATITUDE, CONF_LONGITUDE, CONF_LANGUAGE
@@ -106,8 +106,11 @@ class GooglePollenSensor(Entity):
             for plant in daily_info[0]["plantInfo"]:
                 code = plant["code"]
                 display_name = plant["displayName"]
-                self._attributes[f"{display_name.lower()}_today_({code.lower()})"] = pollen_values[code][0]
-                self._attributes[f"{display_name.lower()}_tomorrow_({code.lower()})"] = pollen_values[code][1]
+                self._attributes[f"{display_name.lower()}_today"] = pollen_values[code][0]
+                self._attributes[f"{display_name.lower()}_tomorrow"] = pollen_values[code][1]
+                _LOGGER.debug("Code %s got displayName %s, with values %d / %d", code, display_name, pollen_values[code][0], pollen_values[code][1])
+
+            self._attributes['last_update'] = datetime.now()
 
             # Set state to the highest pollen value for today
             today_values = [values[0] for values in pollen_values.values()]
