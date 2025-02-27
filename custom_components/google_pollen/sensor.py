@@ -69,7 +69,7 @@ class GooglePollenSensor(Entity):
                 "key": self._api_key,
                 "location.latitude": self._latitude,
                 "location.longitude": self._longitude,
-                "days": 2,
+                "days": 4,
                 "plantsDescription": 0,
                 "languageCode": self._language
             }
@@ -84,7 +84,7 @@ class GooglePollenSensor(Entity):
                 return
 
             daily_info = data.get("dailyInfo", [])
-            pollen_values = [0, 0]
+            pollen_values = [0, 0, 0, 0]
 
             for i, day_info in enumerate(daily_info):
                 plant_info = day_info.get("plantInfo", [])
@@ -94,6 +94,8 @@ class GooglePollenSensor(Entity):
 
             self._attributes = {
                 "tomorrow": pollen_values[1],
+                "day 3": pollen_values[2],
+                "day 4": pollen_values[3],
                 "last_update": datetime.now()
             }
             self._state = pollen_values[0]
