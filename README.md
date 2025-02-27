@@ -1,4 +1,11 @@
 # Home Assistant Google Pollen
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/svenove/home-assistant-google-pollen/hassfest.yaml)
+![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/svenove/home-assistant-google-pollen)
+![GitHub Release](https://img.shields.io/github/v/release/svenove/home-assistant-google-pollen)
+![GitHub commits since latest release](https://img.shields.io/github/commits-since/svenove/home-assistant-google-pollen/latest)
+<a href="https://www.buymeacoffee.com/svenove" target="_blank" title="buymeacoffee">
+  <img src="https://iili.io/JoQ1MeS.md.png"  alt="buymeacoffee-yellow-badge" style="width: 104px;">
+</a>
 
 A Home Assistant custom component to fetch pollen data from the Google Pollen API. 
 
