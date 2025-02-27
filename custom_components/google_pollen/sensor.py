@@ -31,15 +31,18 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     longitude = config.get(CONF_LONGITUDE)
     language = config.get(CONF_LANGUAGE) 
 
-    add_entities([GooglePollenSensor(name, api_key, latitude, longitude, language)], True)
+    pollen_types = ["BIRCH", "HAZEL", "ALDER", "MUGWORT", "ASH", "COTTONWOOD", "OAK", "PINE", "OLIVE", "GRAMINALES", "RAGWEED"]
+    entities = [GooglePollenSensor(name, api_key, latitude, longitude, language, pollen_type) for pollen_type in pollen_types]
+    add_entities(entities, True)
 
 class GooglePollenSensor(Entity):
-    def __init__(self, name, api_key, latitude, longitude, language):
-        self._name = name
+    def __init__(self, name, api_key, latitude, longitude, language, pollen_type):
+        self._name = f"{name} {pollen_type}"
         self._api_key = api_key
         self._latitude = latitude
         self._longitude = longitude
         self._language = language
+        self._pollen_type = pollen_type
         self._state = None
         self._attributes = {}
 
@@ -81,40 +84,19 @@ class GooglePollenSensor(Entity):
                 return
 
             daily_info = data.get("dailyInfo", [])
-            pollen_values = {
-                "BIRCH": [0, 0],
-                "HAZEL": [0, 0],
-                "ALDER": [0, 0],
-                "MUGWORT": [0, 0],
-                "ASH": [0, 0],
-                "COTTONWOOD": [0, 0],
-                "OAK": [0, 0],
-                "PINE": [0, 0],
-                "OLIVE": [0, 0],
-                "GRAMINALES": [0, 0],
-                "RAGWEED": [0, 0]
-            }
+            pollen_values = [0, 0]
 
             for i, day_info in enumerate(daily_info):
                 plant_info = day_info.get("plantInfo", [])
                 for plant in plant_info:
-                    if plant["code"] in pollen_values and "indexInfo" in plant:
-                        pollen_values[plant["code"]][i] = plant["indexInfo"].get("value", 0)
+                    if plant["code"] == self._pollen_type and "indexInfo" in plant:
+                        pollen_values[i] = plant["indexInfo"].get("value", 0)
 
-            # Update the attributes with pollen values using displayName
-            self._attributes = {}
-            for plant in daily_info[0]["plantInfo"]:
-                code = plant["code"]
-                display_name = plant["displayName"]
-                self._attributes[f"{display_name.lower()}_today"] = pollen_values[code][0]
-                self._attributes[f"{display_name.lower()}_tomorrow"] = pollen_values[code][1]
-                _LOGGER.debug("Code %s got displayName %s, with values %d / %d", code, display_name, pollen_values[code][0], pollen_values[code][1])
-
-            self._attributes['last_update'] = datetime.now()
-
-            # Set state to the highest pollen value for today
-            today_values = [values[0] for values in pollen_values.values()]
-            self._state = max(today_values) if today_values else 0
+            self._attributes = {
+                "tomorrow": pollen_values[1],
+                "last_update": datetime.now()
+            }
+            self._state = pollen_values[0]
 
         except requests.RequestException as err:
             _LOGGER.error("Error fetching data: %s", err)
