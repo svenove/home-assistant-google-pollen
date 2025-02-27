@@ -37,7 +37,7 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
 
 class GooglePollenSensor(Entity):
     def __init__(self, name, api_key, latitude, longitude, language, pollen_type):
-        self._name = f"{name} {pollen_type}"
+        self._name = f"Pollen {pollen_type.lower()}"
         self._api_key = api_key
         self._latitude = latitude
         self._longitude = longitude
