@@ -31,7 +31,7 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     longitude = config.get(CONF_LONGITUDE)
     language = config.get(CONF_LANGUAGE) 
 
-    pollen_types = ["BIRCH", "HAZEL", "ALDER", "MUGWORT", "ASH", "COTTONWOOD", "OAK", "PINE", "OLIVE", "GRAMINALES", "RAGWEED"]
+    pollen_types = ["BIRCH", "HAZEL", "ALDER", "MUGWORT", "ASH", "COTTONWOOD", "OAK", "PINE", "OLIVE", "GRAMINALES", "RAGWEED", "ELM", "MAPLE", "JUNIPER", "CYPRESS_PINE", "JAPANESE_CEDAR", "JAPANESE_CYPRESS"]
     entities = [GooglePollenSensor(name, api_key, latitude, longitude, language, pollen_type) for pollen_type in pollen_types]
     add_entities(entities, True)
 
