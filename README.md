@@ -2,14 +2,12 @@
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/svenove/home-assistant-google-pollen/hassfest.yaml)
 ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/svenove/home-assistant-google-pollen)
 ![GitHub Release](https://img.shields.io/github/v/release/svenove/home-assistant-google-pollen)
-![GitHub commits since latest release](https://img.shields.io/github/commits-since/svenove/home-assistant-google-pollen/latest)
-<a href="https://www.buymeacoffee.com/svenove" target="_blank" title="buymeacoffee">
-  <img src="https://iili.io/JoQ1MeS.md.png"  alt="buymeacoffee-yellow-badge" style="width: 104px;">
-</a>
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/svenove)
 
 A Home Assistant custom component to fetch pollen data from the Google Pollen API. 
 
-![screenshot](screenshot.png)
+![{43063651-625A-4FA7-8538-C004CC149D10}](https://github.com/user-attachments/assets/fc7c696c-1515-4bce-933b-878d514b7c35)
+
 
 ## Installation
 
@@ -63,12 +61,138 @@ To obtain an API key for the Google Pollen API, follow these steps:
 
 ## Usage
 
-### Entity Attributes
+### Entities
 
-The sensor provides various attributes for different pollen types. 
-The attribute names are set according to the language configured in configuration.yaml.
+* 17 entities will be created, one for each pollen type.
+* The name will be set to the displayname that the Google Pollen API returns (according to the language configured in `configuration.yaml`).
+* The state of each entity is the Universal Pollen Index (UPI) for today (0-5). In addition, the UPI for tomorrow, day 3 and day 4 are available as attributes on each entity.
 
-The state of the sensor represents the highest pollen value for the current day.
+### Frontend card
+Inspired by @vdbrink (https://vdbrink.github.io/homeassistant/homeassistant_hacs_kleenex.html), I made an example on how to display this in a card in a dashboard - like the screenshot at the top.
+
+You'll need the [Mushroom cards](https://github.com/piitaya/lovelace-mushroom) installed for these to work.
+
+Here is the code for 2 pollen types.
+You need to change the text to display for the various UPI-values, the entity you want to display and the displayname.
+```yaml
+type: horizontal-stack
+title: Pollen
+cards:
+  - type: custom:mushroom-template-card
+    primary: Bjørk
+    secondary: >-
+      {% set level = states(entity) | int %}
+      {% set names = {0: 'Ingen', 1:'Lav', 2: 'Lav +', 3:'Middels', 4:'Høy', 5:'Ekstrem'} %}
+      {% set name = names[level] %} 
+      {{ name }}
+    icon: mdi:flower-pollen-outline
+    entity: sensor.pollen_birch
+    layout: vertical
+    fill_container: true
+    tap_action:
+      action: more-info
+    hold_action:
+      action: none
+    double_tap_action:
+      action: none
+    icon_color: >-
+      {% set level = states(entity) | int %}
+      {% set color = {1:'green', 2: 'yellow', 3:'orange', 4:'#FF6C71', 5:'red'} %}
+      {% set level_color = color[level] %}
+      {{ level_color }}
+    badge_icon: |-
+      {% if (state_attr(entity, 'tomorrow') | int < states(entity) | int) %}
+      mdi:arrow-down
+      {% elif (state_attr(entity, 'tomorrow') | int > states(entity) | int) %}
+      mdi:arrow-up
+      {% else %}
+      mdi:minus
+      {% endif %}
+    badge_color: |-
+      {% if (state_attr(entity, 'tomorrow') | int < states(entity) | int) %}
+      green
+      {% elif (state_attr(entity, 'tomorrow') | int > states(entity) | int) %}
+      red
+      {% endif %}
+  - type: custom:mushroom-template-card
+    primary: Or
+    secondary: >-
+      {% set level = states(entity) | int %}
+      {% set names = {0: 'Ingen', 1:'Lav', 2: 'Lav +', 3:'Middels', 4:'Høy', 5:'Ekstrem'} %}
+      {% set name = names[level] %} 
+      {{ name }}
+    icon: mdi:flower-pollen-outline
+    entity: sensor.pollen_alder
+    layout: vertical
+    fill_container: true
+    tap_action:
+      action: more-info
+    hold_action:
+      action: none
+    double_tap_action:
+      action: none
+    icon_color: >-
+      {% set level = states(entity) | int %}
+      {% set color = {1:'green', 2: 'yellow', 3:'orange', 4:'#FF6C71', 5:'red'}%}
+      {% set level_color = color[level] %}
+      {{ level_color }}
+    badge_icon: |-
+      {% if (state_attr(entity, 'tomorrow') | int < states(entity) | int) %}
+      mdi:arrow-down
+      {% elif (state_attr(entity, 'tomorrow') | int > states(entity) | int) %}
+      mdi:arrow-up
+      {% else %}
+      mdi:minus
+      {% endif %}
+    badge_color: |-
+      {% if (state_attr(entity, 'tomorrow') | int < states(entity) | int) %}
+      green
+      {% elif (state_attr(entity, 'tomorrow') | int > states(entity) | int) %}
+      red
+      {% endif %}
+```
+
+## Frontend chips card
+You can also create a "chip card", that displays a color based on UPI and the UPI-index value for the pollen type with highest value. This can be adjusted to only take into consideration the pollen types you want (inestead of all of them).
+
+You'll need the [Mushroom cards](https://github.com/piitaya/lovelace-mushroom) installed for these to work as well.
+You just add/remove the pollen entities that you like to include.
+
+![{80319AAC-BCA8-4F75-A940-FE04342B2DD5}](https://github.com/user-attachments/assets/9aa53504-3b64-4946-b5db-b6fb9d8643e2)
+
+```yaml
+type: custom:mushroom-chips-card
+chips:
+  - type: template
+    hold_action:
+      action: none
+    double_tap_action:
+      action: none
+    icon: mdi:flower-pollen-outline
+    entity: sensor.pollen_birch
+    icon_color: >-
+      {% set sensors = [
+                  states('sensor.pollen_alder')|int,
+                  states('sensor.pollen_graminales')|int,
+                  states('sensor.pollen_birch')|int,
+                  states('sensor.pollen_mugwort')|int
+                ] %}
+      {% set level = sensors | max | int %}
+      {% set color = {1:'green', 2: 'yellow', 3:'orange', 4:'#FF6C71', 5:'red'} %}
+      {% set level_color = color[level] %}
+      {{ level_color }}
+    content: |-
+      {% set sensors = [
+                  states('sensor.pollen_alder')|int,
+                  states('sensor.pollen_graminales')|int,
+                  states('sensor.pollen_birch')|int,
+                  states('sensor.pollen_mugwort')|int
+                ] %}
+                {{ sensors | max }}
+    tap_action:
+      action: navigate
+      navigation_path: /dashboard-mushroom/pollen
+  ```
 
 ## License
 
