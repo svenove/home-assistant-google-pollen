@@ -36,6 +36,8 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     add_entities(entities, True)
 
 class GooglePollenSensor(Entity):
+    _attr_has_entity_name = True
+
     def __init__(self, name, api_key, latitude, longitude, language, pollen_type):
         self._name = f"{pollen_type.capitalize()}"
         self._code = f"{pollen_type.upper()}"
@@ -51,6 +53,10 @@ class GooglePollenSensor(Entity):
     @property
     def name(self):
         return self._name
+
+    @name.setter
+    def name(self, value):
+        self._name = value
 
     @property
     def code(self):
@@ -99,12 +105,16 @@ class GooglePollenSensor(Entity):
             for i, day_info in enumerate(daily_info):
                 plant_info = day_info.get("plantInfo", [])
                 for plant in plant_info:
-                    if plant["code"] == self._pollen_type and "indexInfo" in plant:
-                        pollen_values[i] = plant["indexInfo"].get("value", 0)
+                    if plant["code"] == self._pollen_type:
+                        self.name = plant["displayName"]
+                        if "indexInfo" in plant:
+                            pollen_values[i] = plant["indexInfo"].get("value", 0)
+                        
                     
             _LOGGER.debug(
-                "Code %s got values %d / %d / %d / %d",
+                "Code %s is %s and got values %d / %d / %d / %d",
                 self._code,
+                self._name,
                 pollen_values[0],
                 pollen_values[1],
                 pollen_values[2],
