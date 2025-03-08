@@ -11,7 +11,6 @@ from homeassistant.util import Throttle
 
 _LOGGER = logging.getLogger(__name__)
 
-DEFAULT_NAME = "Google pollen"
 DEFAULT_LANGUAGE = "en"  
 BASE_URL = "https://pollen.googleapis.com/v1/forecast:lookup"
 SCAN_INTERVAL = timedelta(hours=4)
@@ -20,26 +19,24 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_API_KEY): cv.string,
     vol.Required(CONF_LATITUDE): cv.latitude,
     vol.Required(CONF_LONGITUDE): cv.longitude,
-    vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
     vol.Optional(CONF_LANGUAGE, default=DEFAULT_LANGUAGE): cv.string, 
 })
 
 def setup_platform(hass, config, add_entities, discovery_info=None):
-    name = config.get(CONF_NAME)
     api_key = config.get(CONF_API_KEY)
     latitude = config.get(CONF_LATITUDE)
     longitude = config.get(CONF_LONGITUDE)
     language = config.get(CONF_LANGUAGE) 
 
     pollen_types = ["BIRCH", "HAZEL", "ALDER", "MUGWORT", "ASH", "COTTONWOOD", "OAK", "PINE", "OLIVE", "GRAMINALES", "RAGWEED", "ELM", "MAPLE", "JUNIPER", "CYPRESS_PINE", "JAPANESE_CEDAR", "JAPANESE_CYPRESS"]
-    entities = [GooglePollenSensor(name, api_key, latitude, longitude, language, pollen_type) for pollen_type in pollen_types]
+    entities = [GooglePollenSensor(pollen_type, api_key, latitude, longitude, language, pollen_type) for pollen_type in pollen_types]
     add_entities(entities, True)
 
 class GooglePollenSensor(Entity):
     _attr_has_entity_name = True
 
     def __init__(self, name, api_key, latitude, longitude, language, pollen_type):
-        self._name = f"{pollen_type.capitalize()}"
+        self._name = f"{name.capitalize()}"
         self._code = f"{pollen_type.upper()}"
         self._entity_id = f"sensor.pollen_{pollen_type.lower()}"
         self._api_key = api_key
