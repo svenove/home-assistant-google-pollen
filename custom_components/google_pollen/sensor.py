@@ -30,8 +30,14 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     longitude = config_entry.data[CONF_LONGITUDE]
     language = config_entry.data.get(CONF_LANGUAGE, DEFAULT_LANGUAGE)
 
+    # Create sensors for both pollen categories and specific plant types
     pollen_categories = ["GRASS", "TREE", "WEED"]
-    entities = [GooglePollenSensor(category, api_key, latitude, longitude, language, category) for category in pollen_categories]
+    plant_types = ["BIRCH", "HAZEL", "ALDER", "MUGWORT", "ASH", "COTTONWOOD", "OAK", "PINE", "OLIVE", "GRAMINALES", "RAGWEED", "ELM", "MAPLE", "JUNIPER", "CYPRESS_PINE", "JAPANESE_CEDAR", "JAPANESE_CYPRESS"]
+    
+    entities = []
+    entities.extend([GooglePollenSensor(category, api_key, latitude, longitude, language, category) for category in pollen_categories])
+    entities.extend([GooglePollenSensor(plant_type, api_key, latitude, longitude, language, plant_type) for plant_type in plant_types])
+    
     async_add_entities(entities, True)
 
 # Keep the setup_platform for backwards compatibility
@@ -117,29 +123,40 @@ class GooglePollenSensor(Entity):
             daily_info = data.get("dailyInfo", [])
             if daily_info:
                 today_info = daily_info[0]  # Get today's forecast
+                # Check both pollenTypeInfo and plantInfo sections
                 pollen_type_info = today_info.get("pollenTypeInfo", [])
+                plant_info = today_info.get("plantInfo", [])
                 
-                for pollen_info in pollen_type_info:
+                # Combine both lists for processing
+                all_info = pollen_type_info + plant_info
+                
+                for pollen_info in all_info:
                     if pollen_info.get("code") == self._code:
-                        index_info = pollen_info.get("indexInfo")
+                        index_info = pollen_info.get("indexInfo", {})
+                        self._state = index_info.get("category", "No Data")
                         self._attributes = {
-                            "display_name": pollen_info.get("displayName"),
+                            "display_name": pollen_info.get("displayName", ""),
                             "in_season": pollen_info.get("inSeason", False),
                             "health_recommendations": pollen_info.get("healthRecommendations", []),
                             "last_updated": datetime.now().isoformat(),
                             "latitude": self._latitude,
-                            "longitude": self._longitude
+                            "longitude": self._longitude,
+                            "plant_description": pollen_info.get("plantDescription", ""),
+                            "cross_reactions": pollen_info.get("crossReactions", []),
+                            "season_start": pollen_info.get("seasonStart", ""),
+                            "season_end": pollen_info.get("seasonEnd", ""),
+                            "season_peak": pollen_info.get("seasonPeak", ""),
+                            "season_info": pollen_info.get("seasonInfo", {}),
+                            "description": index_info.get("indexDescription", ""),
+                            "index_value": index_info.get("value", 0),
+                            "index_display_name": index_info.get("displayName", ""),
+                            "color": index_info.get("color", {}),
+                            "index_category": index_info.get("category", ""),
+                            "index_level": index_info.get("level", 0),
+                            "index_trigger": index_info.get("trigger", {}),
+                            "index_scale": index_info.get("scale", {})
                         }
                         
-                        if index_info:
-                            self._state = index_info.get("category")
-                            self._attributes.update({
-                                "description": index_info.get("indexDescription"),
-                                "index_value": index_info.get("value"),
-                                "index_display_name": index_info.get("displayName")
-                            })
-                        else:
-                            self._state = "No Data"
                         break
                 else:
                     self._state = "Not Available"
