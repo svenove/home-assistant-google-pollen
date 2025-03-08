@@ -2,6 +2,7 @@
   "domain": "google_pollen",
   "name": "Google pollen",
   "codeowners": ["@svenove"],
+  "config_flow": true,
   "dependencies": [],
   "documentation": "https://github.com/svenove/home-assistant-google-pollen",
   "integration_type": "device",
