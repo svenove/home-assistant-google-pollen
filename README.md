@@ -78,11 +78,13 @@ title: Pollen
 cards:
   - type: custom:mushroom-template-card
     primary: "{{ state_attr(entity, 'friendly_name') }}"
-    secondary: >-
-      {% set level = states(entity) | int %}
-      {% set names = {0: 'None', 1:'Low', 2: 'Low +', 3:'Medium', 4:'High', 5:'Extreme'} %}
-      {% set name = names[level] %} 
-      {{ name }}
+    secondary: |-
+      {% if states(entity) != "unknown" %}
+        {% set level = states(entity) | int %}
+        {% set names = {0: 'None', 1:'Low', 2: 'Low +', 3:'Medium', 4:'High', 5:'Extrem'} %}
+        {% set name = names[level] %} 
+        {{ name }}
+      {% endif %}
     icon: mdi:flower-pollen-outline
     entity: sensor.pollen_birch
     layout: vertical
@@ -93,32 +95,40 @@ cards:
       action: none
     double_tap_action:
       action: none
-    icon_color: >-
-      {% set level = states(entity) | int %}
-      {% set color = {0: 'grey', 1:'green', 2: 'yellow', 3:'orange',4:'#FF6C71', 5:'red'} %}
-      {% set level_color = color[level] %}
-      {{ level_color }}
+    icon_color: |-
+      {% if states(entity) != "unknown" %}
+        {% set level = states(entity) | int %}
+        {% set color = {0: 'grey', 1:'green', 2: 'yellow', 3:'orange', 4:'#FF6C71', 5:'red'} %}
+        {% set level_color = color[level] %}
+        {{ level_color }}
+      {% endif %}
     badge_icon: |-
-      {% if (state_attr(entity, 'tomorrow') | int < states(entity) | int) %}
+      {% if states(entity) != "unknown" %}
+        {% if (state_attr(entity, 'tomorrow') | int < states(entity) | int) %}
       mdi:arrow-down
-      {% elif (state_attr(entity, 'tomorrow') | int > states(entity) | int) %}
+        {% elif (state_attr(entity, 'tomorrow') | int > states(entity) | int) %}
       mdi:arrow-up
-      {% else %}
+        {% else %}
       mdi:minus
+        {% endif %}
       {% endif %}
     badge_color: |-
-      {% if (state_attr(entity, 'tomorrow') | int < states(entity) | int) %}
+      {% if states(entity) != "unknown" %}
+        {% if (state_attr(entity, 'tomorrow') | int < states(entity) | int) %}
       green
-      {% elif (state_attr(entity, 'tomorrow') | int > states(entity) | int) %}
+        {% elif (state_attr(entity, 'tomorrow') | int > states(entity) | int) %}
       red
+        {% endif %}
       {% endif %}
   - type: custom:mushroom-template-card
     primary: "{{ state_attr(entity, 'friendly_name') }}"
-    secondary: >-
-      {% set level = states(entity) | int %}
-      {% set names = {0: 'None', 1:'Low', 2: 'Low +', 3:'Medium', 4:'High', 5:'Extreme'} %}
-      {% set name = names[level] %} 
-      {{ name }}
+    secondary: |-
+      {% if states(entity) != "unknown" %}
+        {% set level = states(entity) | int %}
+        {% set names = {0: 'None', 1:'Low', 2: 'Low +', 3:'Medium', 4:'High', 5:'Extrem'} %}
+        {% set name = names[level] %} 
+        {{ name }}
+      {% endif %}
     icon: mdi:flower-pollen-outline
     entity: sensor.pollen_alder
     layout: vertical
@@ -129,24 +139,30 @@ cards:
       action: none
     double_tap_action:
       action: none
-    icon_color: >-
-      {% set level = states(entity) | int %}
-      {% set color = {0: 'grey', 1:'green', 2: 'yellow', 3:'orange', 4:'#FF6C71', 5:'red'} %}
-      {% set level_color = color[level] %}
-      {{ level_color }}
+    icon_color: |-
+      {% if states(entity) != "unknown" %}
+        {% set level = states(entity) | int %}
+        {% set color = {0: 'grey', 1:'green', 2: 'yellow', 3:'orange', 4:'#FF6C71', 5:'red'} %}
+        {% set level_color = color[level] %}
+        {{ level_color }}
+      {% endif %}
     badge_icon: |-
-      {% if (state_attr(entity, 'tomorrow') | int < states(entity) | int) %}
+      {% if states(entity) != "unknown" %}
+        {% if (state_attr(entity, 'tomorrow') | int < states(entity) | int) %}
       mdi:arrow-down
-      {% elif (state_attr(entity, 'tomorrow') | int > states(entity) | int) %}
+        {% elif (state_attr(entity, 'tomorrow') | int > states(entity) | int) %}
       mdi:arrow-up
-      {% else %}
+        {% else %}
       mdi:minus
+        {% endif %}
       {% endif %}
     badge_color: |-
-      {% if (state_attr(entity, 'tomorrow') | int < states(entity) | int) %}
+      {% if states(entity) != "unknown" %}
+        {% if (state_attr(entity, 'tomorrow') | int < states(entity) | int) %}
       green
-      {% elif (state_attr(entity, 'tomorrow') | int > states(entity) | int) %}
+        {% elif (state_attr(entity, 'tomorrow') | int > states(entity) | int) %}
       red
+        {% endif %}
       {% endif %}
 ```
 
