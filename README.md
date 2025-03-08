@@ -36,14 +36,12 @@ sensor:
     api_key: YOUR_API_KEY
     latitude: YOUR_LATITUDE
     longitude: YOUR_LONGITUDE
-    name: Custom Sensor Name #(Optional)
     language: "en" #(Optional)
 ```
 
 - `api_key`: Your API key for the Google Pollen API.
 - `latitude`: Latitude of the location you want to monitor.
 - `longitude`: Longitude of the location you want to monitor.
-- `name`: (Optional) Custom name for the sensor (default is "Google pollen").
 - `language`: (Optional) Language code for the data (default is `en`).
 
 ## Obtaining Google Pollen API Key
@@ -73,7 +71,7 @@ Inspired by @vdbrink (https://vdbrink.github.io/homeassistant/homeassistant_hacs
 You'll need the [Mushroom cards](https://github.com/piitaya/lovelace-mushroom) installed for these to work.
 
 Here is the code for 2 pollen types.
-You need to change the text to display for the various UPI-values, the entity you want to display and the displayname.
+You need to change the text to display for the various UPI-values and the entity you want to display.
 ```yaml
 type: horizontal-stack
 title: Pollen
