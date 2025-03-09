@@ -1,5 +1,4 @@
 import logging
-import requests
 import voluptuous as vol
 from datetime import datetime, timedelta
 
