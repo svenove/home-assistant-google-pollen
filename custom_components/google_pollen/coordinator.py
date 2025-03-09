@@ -59,7 +59,7 @@ class GooglePollenDataUpdateCoordinator(DataUpdateCoordinator):
                         result[pollen_code] = {}
                     result[pollen_code][day_index] = {
                         "category": pollen_info.get("indexInfo", {}).get("category", "No Data"),
-                        "display_name": pollen_info.get("displayName", ""),
+                        "display_name": pollen_info.get("displayName", ""),  # Ensure displayName is included
                         "in_season": pollen_info.get("inSeason", False),
                         "health_recommendations": pollen_info.get("healthRecommendations", []),
                         "last_updated": datetime.now().isoformat(),
