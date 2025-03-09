@@ -4,9 +4,10 @@ import voluptuous as vol
 from datetime import datetime, timedelta
 
 from homeassistant.components.sensor import PLATFORM_SCHEMA
-from homeassistant.const import CONF_API_KEY, CONF_NAME, CONF_LATITUDE, CONF_LONGITUDE, CONF_LANGUAGE
+from homeassistant.const import CONF_API_KEY, CONF_LATITUDE, CONF_LONGITUDE, CONF_LANGUAGE
 import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity import Entity
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, CoordinatorEntity
 from homeassistant.util import Throttle
 
 from .const import DOMAIN, DEFAULT_LANGUAGE
@@ -30,45 +31,32 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     longitude = config_entry.data[CONF_LONGITUDE]
     language = config_entry.data.get(CONF_LANGUAGE, DEFAULT_LANGUAGE)
 
-    # Create sensors for both pollen categories and specific plant types
+    coordinator = GooglePollenDataUpdateCoordinator(
+        hass, api_key, latitude, longitude, language
+    )
+
+    await coordinator.async_config_entry_first_refresh()
+
     pollen_categories = ["GRASS", "TREE", "WEED"]
     plant_types = ["BIRCH", "HAZEL", "ALDER", "MUGWORT", "ASH", "COTTONWOOD", "OAK", "PINE", "OLIVE", "GRAMINALES", "RAGWEED", "ELM", "MAPLE", "JUNIPER", "CYPRESS_PINE", "JAPANESE_CEDAR", "JAPANESE_CYPRESS"]
-    
+
     entities = []
-    entities.extend([GooglePollenSensor(category, api_key, latitude, longitude, language, category) for category in pollen_categories])
-    entities.extend([GooglePollenSensor(plant_type, api_key, latitude, longitude, language, plant_type) for plant_type in plant_types])
+    entities.extend([GooglePollenSensor(coordinator, category) for category in pollen_categories])
+    entities.extend([GooglePollenSensor(coordinator, plant_type) for plant_type in plant_types])
     
     async_add_entities(entities, True)
 
-# Keep the setup_platform for backwards compatibility
-def setup_platform(hass, config, add_entities, discovery_info=None):
-    """Set up the sensor platform."""
-    api_key = config.get(CONF_API_KEY)
-    latitude = config.get(CONF_LATITUDE)
-    longitude = config.get(CONF_LONGITUDE)
-    language = config.get(CONF_LANGUAGE)
 
-    pollen_types = ["BIRCH", "HAZEL", "ALDER", "MUGWORT", "ASH", "COTTONWOOD", "OAK", "PINE", "OLIVE", "GRAMINALES", "RAGWEED", "ELM", "MAPLE", "JUNIPER", "CYPRESS_PINE", "JAPANESE_CEDAR", "JAPANESE_CYPRESS"]
-    entities = [GooglePollenSensor(pollen_type, api_key, latitude, longitude, language, pollen_type) for pollen_type in pollen_types]
-    add_entities(entities, True)
-
-class GooglePollenSensor(Entity):
+class GooglePollenSensor(CoordinatorEntity, Entity):
     _attr_has_entity_name = True
-    _attr_should_poll = True
 
-    def __init__(self, name, api_key, latitude, longitude, language, pollen_type):
-        self._attr_unique_id = f"google_pollen_{pollen_type.lower()}_{latitude}_{longitude}"
-        self._attr_name = f"{name.capitalize()}"
-        self._code = f"{pollen_type.upper()}"
-        self._api_key = api_key
-        self._latitude = latitude
-        self._longitude = longitude
-        self._language = language
+    def __init__(self, coordinator, pollen_type):
+        super().__init__(coordinator)
         self._pollen_type = pollen_type
-        self._state = None
-        self._attributes = {}
+        self._attr_unique_id = f"google_pollen_{pollen_type.lower()}_{coordinator.latitude}_{coordinator.longitude}"
+        self._attr_name = f"{pollen_type.capitalize()}"
         self._attr_device_info = {
-            "identifiers": {(DOMAIN, f"{latitude}_{longitude}")},
+            "identifiers": {(DOMAIN, f"{coordinator.latitude}_{coordinator.longitude}")},
             "name": "Google Pollen",
             "manufacturer": "Google",
             "model": "Pollen API",
@@ -79,32 +67,39 @@ class GooglePollenSensor(Entity):
         self._attr_state_class = "measurement"
 
     @property
-    def name(self):
-        return self._attr_name
-    @property
-    def unique_id(self):
-        return self._attr_unique_id
-    @property
-    def device_info(self):
-        return self._attr_device_info
-    @property
     def state(self):
-        return self._state
+        return self.coordinator.data.get(self._pollen_type, {}).get("category", "No Data")
+
     @property
     def extra_state_attributes(self):
-        return self._attributes
+        return self.coordinator.data.get(self._pollen_type, {})
+
     @property
     def icon(self):
         return "mdi:flower-pollen"
-    @Throttle(SCAN_INTERVAL)
-    async def async_update(self):
-        """Fetch new state data for the sensor."""
+
+
+class GooglePollenDataUpdateCoordinator(DataUpdateCoordinator):
+    def __init__(self, hass, api_key, latitude, longitude, language):
+        self.api_key = api_key
+        self.latitude = latitude
+        self.longitude = longitude
+        self.language = language
+        
+        super().__init__(
+            hass,
+            _LOGGER,
+            name="Google Pollen",
+            update_interval=SCAN_INTERVAL,
+        )
+
+    async def _async_update_data(self):
         try:
             params = {
-                "key": self._api_key,
-                "location.latitude": self._latitude,
-                "location.longitude": self._longitude,
-                "languageCode": self._language,
+                "key": self.api_key,
+                "location.latitude": self.latitude,
+                "location.longitude": self.longitude,
+                "languageCode": self.language,
                 "days": 1
             }
             response = await self.hass.async_add_executor_job(
@@ -116,53 +111,45 @@ class GooglePollenSensor(Entity):
 
             if 'error' in data:
                 _LOGGER.error(data['error']['message'])
-                self._attributes = {}
-                self._state = "Error"
-                return
+                return {}
 
             daily_info = data.get("dailyInfo", [])
             if daily_info:
                 today_info = daily_info[0]  # Get today's forecast
-                # Check both pollenTypeInfo and plantInfo sections
                 pollen_type_info = today_info.get("pollenTypeInfo", [])
                 plant_info = today_info.get("plantInfo", [])
-                
-                # Combine both lists for processing
                 all_info = pollen_type_info + plant_info
                 
+                result = {}
                 for pollen_info in all_info:
-                    if pollen_info.get("code") == self._code:
-                        index_info = pollen_info.get("indexInfo", {})
-                        self._state = index_info.get("category", "No Data")
-                        self._attributes = {
-                            "display_name": pollen_info.get("displayName", ""),
-                            "in_season": pollen_info.get("inSeason", False),
-                            "health_recommendations": pollen_info.get("healthRecommendations", []),
-                            "last_updated": datetime.now().isoformat(),
-                            "latitude": self._latitude,
-                            "longitude": self._longitude,
-                            "plant_description": pollen_info.get("plantDescription", ""),
-                            "cross_reactions": pollen_info.get("crossReactions", []),
-                            "season_start": pollen_info.get("seasonStart", ""),
-                            "season_end": pollen_info.get("seasonEnd", ""),
-                            "season_peak": pollen_info.get("seasonPeak", ""),
-                            "season_info": pollen_info.get("seasonInfo", {}),
-                            "description": index_info.get("indexDescription", ""),
-                            "index_value": index_info.get("value", 0),
-                            "index_display_name": index_info.get("displayName", ""),
-                            "color": index_info.get("color", {}),
-                            "index_category": index_info.get("category", ""),
-                            "index_level": index_info.get("level", 0),
-                            "index_trigger": index_info.get("trigger", {}),
-                            "index_scale": index_info.get("scale", {})
-                        }
-                        
-                        break
-                else:
-                    self._state = "Not Available"
-                    self._attributes = {}
+                    index_info = pollen_info.get("indexInfo", {})
+                    result[pollen_info.get("code")] = {
+                        "category": index_info.get("category", "No Data"),
+                        "display_name": pollen_info.get("displayName", ""),
+                        "in_season": pollen_info.get("inSeason", False),
+                        "health_recommendations": pollen_info.get("healthRecommendations", []),
+                        "last_updated": datetime.now().isoformat(),
+                        "latitude": self.latitude,
+                        "longitude": self.longitude,
+                        "plant_description": pollen_info.get("plantDescription", ""),
+                        "cross_reactions": pollen_info.get("crossReactions", []),
+                        "season_start": pollen_info.get("seasonStart", ""),
+                        "season_end": pollen_info.get("seasonEnd", ""),
+                        "season_peak": pollen_info.get("seasonPeak", ""),
+                        "season_info": pollen_info.get("seasonInfo", {}),
+                        "description": index_info.get("indexDescription", ""),
+                        "index_value": index_info.get("value", 0),
+                        "index_display_name": index_info.get("displayName", ""),
+                        "color": index_info.get("color", {}),
+                        "index_category": index_info.get("category", ""),
+                        "index_level": index_info.get("level", 0),
+                        "index_trigger": index_info.get("trigger", {}),
+                        "index_scale": index_info.get("scale", {})
+                    }
 
+                return result
+
+            return {}
         except Exception as error:
-            _LOGGER.error("Error updating Google Pollen sensor: %s", error)
-            self._state = None
-            self._attributes = {}
+            _LOGGER.error("Error updating Google Pollen data: %s", error)
+            return {}
