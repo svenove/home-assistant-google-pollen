@@ -1,5 +1,5 @@
 import logging
-import requests
+import aiohttp
 from datetime import datetime, timedelta
 
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
@@ -33,13 +33,13 @@ class GooglePollenDataUpdateCoordinator(DataUpdateCoordinator):
                 "location.longitude": self.longitude,
                 "languageCode": self.language,
                 "days": 4,
-                "plantsDescription": False
+                "plantsDescription": "false"
             }
-            response = await self.hass.async_add_executor_job(
-                lambda: requests.get(BASE_URL, params=params)
-            )
-            response.raise_for_status()
-            data = response.json()
+            async with aiohttp.ClientSession() as session:
+                async with session.get(BASE_URL, params=params) as response:
+                    response.raise_for_status()
+                    data = await response.json()
+            
             _LOGGER.debug("Pollen data: %s", data)
 
             if 'error' in data:
@@ -59,18 +59,18 @@ class GooglePollenDataUpdateCoordinator(DataUpdateCoordinator):
                     if pollen_code not in result:
                         result[pollen_code] = {}
                     result[pollen_code][day_index] = {
-                        "category": pollen_info.get("indexInfo", {}).get("category", "No Data"),
-                        "display_name": pollen_info.get("displayName", ""), 
-                        "in_season": pollen_info.get("inSeason", False),
+                        "category": str(pollen_info.get("indexInfo", {}).get("category", "No Data")),
+                        "display_name": str(pollen_info.get("displayName", "")), 
+                        "in_season": str(pollen_info.get("inSeason", "False")),
                         "last_updated": datetime.now().isoformat(),
-                        "description": pollen_info.get("indexInfo", {}).get("indexDescription", ""),
-                        "index_value": pollen_info.get("indexInfo", {}).get("value", 0)
+                        "description": str(pollen_info.get("indexInfo", {}).get("indexDescription", "")),
+                        "index_value": float(pollen_info.get("indexInfo", {}).get("value", 0))
                     }
             
             for pollen_code, pollen_data in result.items():
-                result[pollen_code][0]["tomorrow"] = pollen_data.get(1, {}).get("index_value", 0)
-                result[pollen_code][0]["day 3"] = pollen_data.get(2, {}).get("index_value", 0)
-                result[pollen_code][0]["day 4"] = pollen_data.get(3, {}).get("index_value", 0)
+                result[pollen_code][0]["tomorrow"] = float(pollen_data.get(1, {}).get("index_value", 0))
+                result[pollen_code][0]["day 3"] = float(pollen_data.get(2, {}).get("index_value", 0))
+                result[pollen_code][0]["day 4"] = float(pollen_data.get(3, {}).get("index_value", 0))
 
             _LOGGER.debug("Result data: %s", result)
 
