@@ -25,7 +25,7 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     errors["base"] = "invalid_coordinates"
                 else:
                     return self.async_create_entry(
-                        title=f"Google Pollen ({latitude}, {longitude})",
+                        title=f"Pollen ({latitude}, {longitude})",
                         data=user_input
                     )
             except (ValueError, TypeError):
@@ -35,10 +35,10 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="user",
             data_schema=vol.Schema(
                 {
-                    vol.Required(CONF_API_KEY): str,
+                    vol.Required(CONF_API_KEY): cv.string,
                     vol.Required(CONF_LATITUDE, default=self.hass.config.latitude): cv.latitude,
                     vol.Required(CONF_LONGITUDE, default=self.hass.config.longitude): cv.longitude,
-                    vol.Optional(CONF_LANGUAGE, default=DEFAULT_LANGUAGE): str,
+                    vol.Optional(CONF_LANGUAGE, default=DEFAULT_LANGUAGE): cv.language,
                 }
             ),
             errors=errors,
@@ -72,7 +72,7 @@ class GooglePollenOptionsFlow(config_entries.OptionsFlow):
                         default=self.config_entry.options.get(
                             CONF_LANGUAGE, DEFAULT_LANGUAGE
                         ),
-                    ): str,
+                    ): cv.language,
                 }
             ),
         )
