@@ -2,7 +2,7 @@
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/svenove/home-assistant-google-pollen/hassfest.yaml)
 ![GitHub Issues or Pull Requests](https://img.shields.io/github/issues/svenove/home-assistant-google-pollen)
 ![GitHub Release](https://img.shields.io/github/v/release/svenove/home-assistant-google-pollen)
-[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?&logo=buy-me-a-coffee&logoColor=black)](https://www.buymeacoffee.com/svenove)
+[![Buy me a coffee](https://img.shields.io/badge/Buy_me_a_coffee-ffdd00?logo=buy-me-a-coffee&logoColor=black&logoSize=auto)](https://www.buymeacoffee.com/svenove)
 
 A Home Assistant custom component to fetch pollen data from the Google Pollen API. 
 
@@ -27,22 +27,16 @@ A Home Assistant custom component to fetch pollen data from the Google Pollen AP
 3. Restart Home Assistant.
 
 ## Configuration
+Configuration is all done in the UI. 
 
-Add the following to your `configuration.yaml` file:
-
-```yaml
-sensor:
-  - platform: google_pollen
-    api_key: YOUR_API_KEY
-    latitude: YOUR_LATITUDE
-    longitude: YOUR_LONGITUDE
-    language: "en" #(Optional)
-```
+Simply add the integration and fill out the details:
 
 - `api_key`: Your API key for the Google Pollen API.
-- `latitude`: Latitude of the location you want to monitor.
-- `longitude`: Longitude of the location you want to monitor.
+- `latitude`: Latitude of the location you want to monitor (defaults to your configured home latitude).
+- `longitude`: Longitude of the location you want to monitor (defaults to your configured home longitude).
 - `language`: (Optional) Language code for the data (default is `en`).
+
+Tip: you can add multiple locations - perhaps one for home and one for the summer cabin?
 
 ## Obtaining Google Pollen API Key
 
@@ -59,34 +53,34 @@ To obtain an API key for the Google Pollen API, follow these steps:
 
 ## Usage
 
-### Entities
+### Devices/entities
 
-* 17 entities will be created, one for each pollen type.
-* The name will be set to the displayname that the Google Pollen API returns (according to the language configured in `configuration.yaml`).
-* The state of each entity is the Universal Pollen Index (UPI) for today (0-5). In addition, the UPI for tomorrow, day 3 and day 4 are available as attributes on each entity.
+* For each location/service, 19 entities will be created, one for each pollen type.
+* The displayname of the entities will be set to the displayname that the Google Pollen API returns (according to the language configured when adding the location).
+* The state of each entity is the text representation of the Universal Pollen Index (UPI) for today. In addition, the numeric UPI (0-5) for today, tomorrow, day 3 and day 4 are available as attributes on each entity.
 
 ### Frontend card
 Inspired by @vdbrink (https://vdbrink.github.io/homeassistant/homeassistant_hacs_kleenex.html), I made an example on how to display this in a card in a dashboard - like the screenshot at the top.
 
 You'll need the [Mushroom cards](https://github.com/piitaya/lovelace-mushroom) installed for these to work.
 
-Here is the code for 2 pollen types.
+Here is the code for one pollen type.
 You need to change the text to display for the various UPI-values and the entity you want to display.
 ```yaml
 type: horizontal-stack
 title: Pollen
 cards:
   - type: custom:mushroom-template-card
-    primary: "{{ state_attr(entity, 'friendly_name') }}"
+    primary: "{{ state_attr(entity, 'display_name') }}"
     secondary: |-
       {% if states(entity) != "unknown" %}
-        {% set level = states(entity) | int %}
-        {% set names = {0: 'None', 1:'Low', 2: 'Low +', 3:'Medium', 4:'High', 5:'Extrem'} %}
+        {% set level = state_attr(entity, 'index_value') | int %}
+          {% set names = {0: 'Ingen', 1:'Lav', 2: 'Lav +', 3:'Middels', 4:'Høy', 5:'Ekstrem'} %}
         {% set name = names[level] %} 
         {{ name }}
       {% endif %}
     icon: mdi:flower-pollen-outline
-    entity: sensor.pollen_birch
+    entity: sensor.google_pollen_bjork
     layout: vertical
     fill_container: true
     tap_action:
@@ -97,16 +91,16 @@ cards:
       action: none
     icon_color: |-
       {% if states(entity) != "unknown" %}
-        {% set level = states(entity) | int %}
+        {% set level = state_attr(entity, 'index_value') | int %}
         {% set color = {0: 'grey', 1:'green', 2: 'yellow', 3:'orange', 4:'#FF6C71', 5:'red'} %}
         {% set level_color = color[level] %}
         {{ level_color }}
       {% endif %}
     badge_icon: |-
       {% if states(entity) != "unknown" %}
-        {% if (state_attr(entity, 'tomorrow') | int < states(entity) | int) %}
+        {% if (state_attr(entity, 'tomorrow') | int < state_attr(entity, 'index_value') | int) %}
       mdi:arrow-down
-        {% elif (state_attr(entity, 'tomorrow') | int > states(entity) | int) %}
+        {% elif (state_attr(entity, 'tomorrow') | int > state_attr(entity, 'index_value') | int) %}
       mdi:arrow-up
         {% else %}
       mdi:minus
@@ -114,53 +108,9 @@ cards:
       {% endif %}
     badge_color: |-
       {% if states(entity) != "unknown" %}
-        {% if (state_attr(entity, 'tomorrow') | int < states(entity) | int) %}
+        {% if (state_attr(entity, 'tomorrow') | int < state_attr(entity, 'index_value') | int) %}
       green
-        {% elif (state_attr(entity, 'tomorrow') | int > states(entity) | int) %}
-      red
-        {% endif %}
-      {% endif %}
-  - type: custom:mushroom-template-card
-    primary: "{{ state_attr(entity, 'friendly_name') }}"
-    secondary: |-
-      {% if states(entity) != "unknown" %}
-        {% set level = states(entity) | int %}
-        {% set names = {0: 'None', 1:'Low', 2: 'Low +', 3:'Medium', 4:'High', 5:'Extrem'} %}
-        {% set name = names[level] %} 
-        {{ name }}
-      {% endif %}
-    icon: mdi:flower-pollen-outline
-    entity: sensor.pollen_alder
-    layout: vertical
-    fill_container: true
-    tap_action:
-      action: more-info
-    hold_action:
-      action: none
-    double_tap_action:
-      action: none
-    icon_color: |-
-      {% if states(entity) != "unknown" %}
-        {% set level = states(entity) | int %}
-        {% set color = {0: 'grey', 1:'green', 2: 'yellow', 3:'orange', 4:'#FF6C71', 5:'red'} %}
-        {% set level_color = color[level] %}
-        {{ level_color }}
-      {% endif %}
-    badge_icon: |-
-      {% if states(entity) != "unknown" %}
-        {% if (state_attr(entity, 'tomorrow') | int < states(entity) | int) %}
-      mdi:arrow-down
-        {% elif (state_attr(entity, 'tomorrow') | int > states(entity) | int) %}
-      mdi:arrow-up
-        {% else %}
-      mdi:minus
-        {% endif %}
-      {% endif %}
-    badge_color: |-
-      {% if states(entity) != "unknown" %}
-        {% if (state_attr(entity, 'tomorrow') | int < states(entity) | int) %}
-      green
-        {% elif (state_attr(entity, 'tomorrow') | int > states(entity) | int) %}
+        {% elif (state_attr(entity, 'tomorrow') | int > state_attr(entity, 'index_value') | int) %}
       red
         {% endif %}
       {% endif %}
