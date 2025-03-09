@@ -192,10 +192,10 @@ chips:
     entity: sensor.google_pollen_birch
     icon_color: >-
       {% set sensors = [
-                  states('sensor.google_pollen_alder')|int,
-                  states('sensor.google_pollen_graminales')|int,
-                  states('sensor.google_pollen_birch')|int,
-                  states('sensor.google_pollen_mugwort')|int
+                  state_attr('sensor.google_pollen_alder', 'index_value')|int,
+                  state_attr('sensor.google_pollen_graminales', 'index_value')|int,
+                  state_attr('sensor.google_pollen_birch', 'index_value')|int,
+                  state_attr('sensor.google_pollen_mugwort', 'index_value')|int
                 ] %}
       {% set level = sensors | max | int %}
       {% set color = {1:'green', 2: 'yellow', 3:'orange', 4:'#FF6C71', 5:'red'} %}
@@ -203,10 +203,10 @@ chips:
       {{ level_color }}
     content: |-
       {% set sensors = [
-                  states('sensor.google_pollen_alder')|int,
-                  states('sensor.google_pollen_graminales')|int,
-                  states('sensor.google_pollen_birch')|int,
-                  states('sensor.google_pollen_mugwort')|int
+                  state_attr('sensor.google_pollen_alder', 'index_value)|int,
+                  state_attr('sensor.google_pollen_graminales', 'index_value')|int,
+                  state_attr('sensor.google_pollen_birch', 'index_value')|int,
+                  state_attr('sensor.google_pollen_mugwort', 'index_value')|int
                 ] %}
                 {{ sensors | max }}
     tap_action:
