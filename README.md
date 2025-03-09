@@ -121,12 +121,12 @@ Inspired by @vdbrink (https://vdbrink.github.io/homeassistant/homeassistant_hacs
 
 You'll need the [Apex chart cards](https://github.com/RomRider/apexcharts-card) installed for these to work.
 
-Here is the code for 2 pollen types.
+Here is the code for one pollen type.
 ```yaml
 type: custom:apexcharts-card
 header:
   show: true
-  title: Pollen forecast
+  title: Pollenvarsel
   show_states: false
   colorize_states: true
 now:
@@ -141,8 +141,9 @@ yaxis:
     apex_config:
       tickAmount: 5
 series:
-  - entity: sensor.pollen_birch
+  - entity: sensor.google_pollen_bjork
     type: column
+    attribute: index_value
     color: "#1f77b4"
     data_generator: >
       let data = []; 
@@ -150,32 +151,25 @@ series:
       const today = moment().startOf('day'); 
 
       if (entity.state) {
-        data.push([today.valueOf(), entity.state]);
+        data.push([today.valueOf(), entity.attributes.index_value]);
       }
 
-      data.push([today.clone().add(1, 'days').valueOf(), entity.attributes.tomorrow]);
-      data.push([today.clone().add(2, 'days').valueOf(), entity.attributes["day 3"]]); 
-      data.push([today.clone().add(3, 'days').valueOf(), entity.attributes["day 4"]]);
+      data.push([today.clone().add(1, 'days').valueOf(),
+      entity.attributes.tomorrow]);  data.push([today.clone().add(2,
+      'days').valueOf(), entity.attributes["day 3"]]); 
+      data.push([today.clone().add(3, 'days').valueOf(), entity.attributes["day
+      4"]]);
 
       return data;
-  - name: Or
-    entity: sensor.pollen_alder
-    type: column
-    color: "#ff7f0e"
-    data_generator: >
-      let data = []; 
-
-      const today = moment().startOf('day'); 
-
-      if (entity.state) {
-        data.push([today.valueOf(), entity.state]);
-      }
-
-      data.push([today.clone().add(1, 'days').valueOf(), entity.attributes.tomorrow]);
-      data.push([today.clone().add(2, 'days').valueOf(), entity.attributes["day 3"]]); 
-      data.push([today.clone().add(3, 'days').valueOf(), entity.attributes["day 4"]]);
-
-      return data;
+apex_config:
+  plotOptions:
+    bar:
+      columnWidth: 40%
+  tooltip:
+    enabled: true
+  legend:
+    show: true
+    position: bottom
 ```
 
 ## Frontend chips card
@@ -195,13 +189,13 @@ chips:
     double_tap_action:
       action: none
     icon: mdi:flower-pollen-outline
-    entity: sensor.pollen_birch
+    entity: sensor.google_pollen_birch
     icon_color: >-
       {% set sensors = [
-                  states('sensor.pollen_alder')|int,
-                  states('sensor.pollen_graminales')|int,
-                  states('sensor.pollen_birch')|int,
-                  states('sensor.pollen_mugwort')|int
+                  states('sensor.google_pollen_alder')|int,
+                  states('sensor.google_pollen_graminales')|int,
+                  states('sensor.google_pollen_birch')|int,
+                  states('sensor.google_pollen_mugwort')|int
                 ] %}
       {% set level = sensors | max | int %}
       {% set color = {1:'green', 2: 'yellow', 3:'orange', 4:'#FF6C71', 5:'red'} %}
@@ -209,16 +203,21 @@ chips:
       {{ level_color }}
     content: |-
       {% set sensors = [
-                  states('sensor.pollen_alder')|int,
-                  states('sensor.pollen_graminales')|int,
-                  states('sensor.pollen_birch')|int,
-                  states('sensor.pollen_mugwort')|int
+                  states('sensor.google_pollen_alder')|int,
+                  states('sensor.google_pollen_graminales')|int,
+                  states('sensor.google_pollen_birch')|int,
+                  states('sensor.google_pollen_mugwort')|int
                 ] %}
                 {{ sensors | max }}
     tap_action:
       action: navigate
       navigation_path: /dashboard-mushroom/pollen
   ```
+
+## Contributions
+Thanks to [@actstorms](https://www.github.com/actstorms) for helping create the config flow (UI, instead of YAML)!
+
+Other contributions are very welcome, just submit a PR! :)
 
 ## License
 
