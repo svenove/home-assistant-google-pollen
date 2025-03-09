@@ -55,7 +55,7 @@ class GooglePollenSensor(CoordinatorEntity, Entity):
         super().__init__(coordinator)
         self._pollen_type = pollen_type
         self._attr_unique_id = f"google_pollen_{pollen_type.lower()}_{coordinator.latitude}_{coordinator.longitude}"
-        self._attr_name = f"{pollen_type.capitalize()}"
+        self._attr_name = self.get_display_name(pollen_type)
         self._attr_device_info = {
             "identifiers": {(DOMAIN, f"{coordinator.latitude}_{coordinator.longitude}")},
             "name": "Google Pollen",
@@ -66,6 +66,11 @@ class GooglePollenSensor(CoordinatorEntity, Entity):
         }
         self._attr_device_class = "enum"
         self._attr_state_class = "measurement"
+
+    def get_display_name(self, pollen_type):
+        """Get the display name for the pollen type."""
+        display_name = self.coordinator.data.get(pollen_type, {}).get(0, {}).get("display_name", pollen_type.capitalize())
+        return display_name
 
     @property
     def state(self):
