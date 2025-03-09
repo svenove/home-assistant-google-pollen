@@ -39,12 +39,12 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     await coordinator.async_config_entry_first_refresh()
 
     pollen_categories = ["GRASS", "TREE", "WEED"]
-    plant_types = ["BIRCH", "HAZEL", "ALDER", "MUGWORT", "ASH", "COTTONWOOD", "OAK", "PINE", "OLIVE", "GRAMINALES", "RAGWEED", "ELM", "MAPLE", "JUNIPER", "CYPRESS_PINE", "JAPANESE_CEDAR", "JAPANESE_CYPRESS"]
+    plant_types = ["BIRCH", "HAZEL", "ALDER", "MUGWORT", "ASH", "COTTONWOOD", "OAK", "PINE", "OLIVE", "GRAMINALES", "RAGWEED", "ELM", "MAPLE", "JUNIPER", "CYPRESS_PINE", "JAPANESE_CEDAR"]
 
     entities = []
     entities.extend([GooglePollenSensor(coordinator, category) for category in pollen_categories])
     entities.extend([GooglePollenSensor(coordinator, plant_type) for plant_type in plant_types])
-    
+
     async_add_entities(entities, True)
 
 
@@ -69,12 +69,13 @@ class GooglePollenSensor(CoordinatorEntity, Entity):
 
     @property
     def state(self):
-        return self.coordinator.data.get(self._pollen_type, {}).get("category", "No Data")
+        return self.coordinator.data.get(self._pollen_type, {}).get(0, {}).get("index_value", 0)
 
     @property
     def extra_state_attributes(self):
-        return self.coordinator.data.get(self._pollen_type, {})
+        return self.coordinator.data.get(self._pollen_type, {}).get(0, {})
 
     @property
     def icon(self):
         return "mdi:flower-pollen"
+        
