@@ -21,7 +21,7 @@ class GooglePollenDataUpdateCoordinator(DataUpdateCoordinator):
         super().__init__(
             hass,
             _LOGGER,
-            name="Google Pollen",
+            name="Pollen",
             update_interval=SCAN_INTERVAL,
         )
 
@@ -32,7 +32,8 @@ class GooglePollenDataUpdateCoordinator(DataUpdateCoordinator):
                 "location.latitude": self.latitude,
                 "location.longitude": self.longitude,
                 "languageCode": self.language,
-                "days": 4  # Fetch data for 4 days
+                "days": 4,
+                "plantsDescription": False
             }
             response = await self.hass.async_add_executor_job(
                 lambda: requests.get(BASE_URL, params=params)
@@ -59,20 +60,13 @@ class GooglePollenDataUpdateCoordinator(DataUpdateCoordinator):
                         result[pollen_code] = {}
                     result[pollen_code][day_index] = {
                         "category": pollen_info.get("indexInfo", {}).get("category", "No Data"),
-                        "display_name": pollen_info.get("displayName", ""),  # Ensure displayName is included
+                        "display_name": pollen_info.get("displayName", ""), 
                         "in_season": pollen_info.get("inSeason", False),
-                        "health_recommendations": pollen_info.get("healthRecommendations", []),
                         "last_updated": datetime.now().isoformat(),
-                        "latitude": self.latitude,
-                        "longitude": self.longitude,
                         "description": pollen_info.get("indexInfo", {}).get("indexDescription", ""),
-                        "index_value": pollen_info.get("indexInfo", {}).get("value", 0),
-                        "index_display_name": pollen_info.get("indexInfo", {}).get("displayName", ""),
-                        "color": pollen_info.get("indexInfo", {}).get("color", {}),
-                        "index_category": pollen_info.get("indexInfo", {}).get("category", ""),
-                        "index_level": pollen_info.get("indexInfo", {}).get("level", 0)
+                        "index_value": pollen_info.get("indexInfo", {}).get("value", 0)
                     }
-            # Add the new attributes
+            
             for pollen_code, pollen_data in result.items():
                 result[pollen_code][0]["tomorrow"] = pollen_data.get(1, {}).get("index_value", 0)
                 result[pollen_code][0]["day 3"] = pollen_data.get(2, {}).get("index_value", 0)
