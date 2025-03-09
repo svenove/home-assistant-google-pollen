@@ -69,7 +69,7 @@ class GooglePollenSensor(CoordinatorEntity, Entity):
 
     @property
     def state(self):
-        return self.coordinator.data.get(self._pollen_type, {}).get(0, {}).get("index_value", 0)
+        return self.coordinator.data.get(self._pollen_type, {}).get(0, {}).get("category", "No data")
 
     @property
     def extra_state_attributes(self):
@@ -78,4 +78,3 @@ class GooglePollenSensor(CoordinatorEntity, Entity):
     @property
     def icon(self):
         return "mdi:flower-pollen"
-        
