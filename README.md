@@ -66,6 +66,8 @@ You'll need the [Mushroom cards](https://github.com/piitaya/lovelace-mushroom) i
 
 Here is the code for one pollen type.
 You need to change the text to display for the various UPI-values and the entity you want to display.
+Note: to better fit narrow screens, I made my own scale for the 0-5 UPI. If you want to use the offical scale (like "very low", etc), you could simply set this as "secondary":
+`{{ states(entity) }}`
 ```yaml
 type: horizontal-stack
 title: Pollen
@@ -75,7 +77,7 @@ cards:
     secondary: |-
       {% if states(entity) != "unknown" %}
         {% set level = state_attr(entity, 'index_value') | int %}
-          {% set names = {0: 'Ingen', 1:'Lav', 2: 'Lav +', 3:'Middels', 4:'Høy', 5:'Ekstrem'} %}
+          {% set names = {0: 'None', 1:'Low', 2: 'Low +', 3:'Medium', 4:'High', 5:'Extreme'} %}
         {% set name = names[level] %} 
         {{ name }}
       {% endif %}
