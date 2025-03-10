@@ -49,7 +49,7 @@ To obtain an API key for the Google Pollen API, follow these steps:
 5. Search for "Pollen API" and enable it.
 6. Go to the "Credentials" tab on the left sidebar.
 7. Click on "Create credentials" and select "API key".
-8. Copy the generated API key and use it in the `api_key` field in your `configuration.yaml` file.
+8. Copy the generated API key and use it in the `api_key` field during configuration.
 
 ## Usage
 
