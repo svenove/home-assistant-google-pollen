@@ -1,12 +1,16 @@
 """Config flow for Google Pollen integration."""
+import logging
 import re
+import aiohttp
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.const import CONF_API_KEY, CONF_LATITUDE, CONF_LONGITUDE, CONF_LANGUAGE
 from homeassistant.core import callback
 import homeassistant.helpers.config_validation as cv
 
-from .const import DOMAIN, DEFAULT_LANGUAGE
+from .const import BASE_URL, DOMAIN, DEFAULT_LANGUAGE
+
+_LOGGER = logging.getLogger(__name__)
 
 class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Google Pollen."""
@@ -18,24 +22,38 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
 
         if user_input is not None:
-            # Validate the API key
             api_key = user_input.get(CONF_API_KEY)
             if not re.match(r"^AIza[0-9A-Za-z-_]{35}$", api_key):
                 errors[CONF_API_KEY] = "invalid_api_key"
             else:
                 try:
-                    # Validate latitude and longitude
+                    async with aiohttp.ClientSession() as session:
+                        params = {
+                            "key": api_key,
+                            "location.latitude": user_input[CONF_LATITUDE],
+                            "location.longitude": user_input[CONF_LONGITUDE],
+                            "languageCode": user_input.get(CONF_LANGUAGE, DEFAULT_LANGUAGE),
+                            "days": 1,
+                            "plantsDescription": "false"
+                        }
+                        async with session.get(BASE_URL, params=params) as response:
+                            response.raise_for_status()
+                            data = await response.json()
+
+                    _LOGGER.debug("API-result: %s", data)
+                    
                     latitude = float(user_input[CONF_LATITUDE])
                     longitude = float(user_input[CONF_LONGITUDE])
-                    if not (-90 <= latitude <= 90) or not (-180 <= longitude <= 180):
-                        errors["base"] = "invalid_coordinates"
+                    return self.async_create_entry(
+                        title=f"Pollen ({latitude}, {longitude})",
+                        data=user_input
+                    )
+                except aiohttp.ClientResponseError as error:
+                    if error.status == 400:
+                        errors[CONF_API_KEY] = "invalid_api_key"
                     else:
-                        return self.async_create_entry(
-                            title=f"Pollen ({latitude}, {longitude})",
-                            data=user_input
-                        )
-                except (ValueError, TypeError):
-                    errors["base"] = "invalid_coordinates"
+                        errors["base"] = "api_error"
+                    _LOGGER.error("Error validating API key: %s", error)
 
         return self.async_show_form(
             step_id="user",
