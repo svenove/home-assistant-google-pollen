@@ -1,4 +1,5 @@
 """Config flow for Google Pollen integration."""
+import re
 import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.const import CONF_API_KEY, CONF_LATITUDE, CONF_LONGITUDE, CONF_LANGUAGE
@@ -17,19 +18,24 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
 
         if user_input is not None:
-            try:
-                # Validate latitude and longitude
-                latitude = float(user_input[CONF_LATITUDE])
-                longitude = float(user_input[CONF_LONGITUDE])
-                if not (-90 <= latitude <= 90) or not (-180 <= longitude <= 180):
+            # Validate the API key
+            api_key = user_input.get(CONF_API_KEY)
+            if not re.match(r"^AIza[0-9A-Za-z-_]{35}$", api_key):
+                errors[CONF_API_KEY] = "invalid_api_key"
+            else:
+                try:
+                    # Validate latitude and longitude
+                    latitude = float(user_input[CONF_LATITUDE])
+                    longitude = float(user_input[CONF_LONGITUDE])
+                    if not (-90 <= latitude <= 90) or not (-180 <= longitude <= 180):
+                        errors["base"] = "invalid_coordinates"
+                    else:
+                        return self.async_create_entry(
+                            title=f"Pollen ({latitude}, {longitude})",
+                            data=user_input
+                        )
+                except (ValueError, TypeError):
                     errors["base"] = "invalid_coordinates"
-                else:
-                    return self.async_create_entry(
-                        title=f"Pollen ({latitude}, {longitude})",
-                        data=user_input
-                    )
-            except (ValueError, TypeError):
-                errors["base"] = "invalid_coordinates"
 
         return self.async_show_form(
             step_id="user",
