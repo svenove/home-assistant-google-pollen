@@ -16,14 +16,7 @@ from homeassistant.const import (
 from homeassistant.core import callback
 import homeassistant.helpers.config_validation as cv
 
-from .const import (
-    CONF_POLLEN,
-    CONF_POLLEN_CATEGORIES,
-    DEFAULT_LANGUAGE,
-    DOMAIN,
-    PLANT_TYPES,
-    POLLEN_CATEGORIES,
-)
+from .const import CONF_POLLEN, CONF_POLLEN_CATEGORIES, DEFAULT_LANGUAGE, DOMAIN
 from .utils import fetch_pollen_data
 
 _LOGGER = logging.getLogger(__name__)
@@ -37,6 +30,8 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     def __init__(self):
         """Initialize the config flow."""
         self._init_info = {}
+        self._pollen_categories = []
+        self._pollen_types = []
 
     async def async_step_user(self, user_input=None):
         """Handle the initial step."""
@@ -48,7 +43,7 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 errors[CONF_API_KEY] = "invalid_api_key"
             else:
                 try:
-                    await fetch_pollen_data(
+                    pollen_data = await fetch_pollen_data(
                         api_key=api_key,
                         latitude=user_input[CONF_LATITUDE],
                         longitude=user_input[CONF_LONGITUDE],
@@ -57,6 +52,22 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     )
 
                     self._init_info = user_input
+                    self._pollen_categories = [
+                        item["displayName"]
+                        for item in pollen_data["dailyInfo"][0]["pollenTypeInfo"]
+                    ]
+                    self._pollen_types = [
+                        item["displayName"]
+                        for item in pollen_data["dailyInfo"][0]["plantInfo"]
+                    ]
+                    self._pollen_categories_codes = [
+                        item["code"]
+                        for item in pollen_data["dailyInfo"][0]["pollenTypeInfo"]
+                    ]
+                    self._pollen_types_codes = [
+                        item["code"]
+                        for item in pollen_data["dailyInfo"][0]["plantInfo"]
+                    ]
                     return await self.async_step_select_pollen()
 
                 except aiohttp.ClientResponseError as error:
@@ -86,8 +97,14 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     async def async_step_select_pollen(self, user_input=None):
         """Handle the step to select pollen categories."""
         if user_input is not None:
-            self._init_info[CONF_POLLEN_CATEGORIES] = user_input[CONF_POLLEN_CATEGORIES]
-            self._init_info[CONF_POLLEN] = user_input[CONF_POLLEN]
+            self._init_info[CONF_POLLEN_CATEGORIES] = [
+                self._pollen_categories_codes[self._pollen_categories.index(category)]
+                for category in user_input[CONF_POLLEN_CATEGORIES]
+            ]
+            self._init_info[CONF_POLLEN] = [
+                self._pollen_types_codes[self._pollen_types.index(pollen)]
+                for pollen in user_input[CONF_POLLEN]
+            ]
             await self.async_set_unique_id(
                 f"{self._init_info[CONF_LATITUDE]}-{self._init_info[CONF_LONGITUDE]}"
             )
@@ -98,16 +115,16 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 data=self._init_info,
             )
 
-        pollen_categories = POLLEN_CATEGORIES
-        pollen = PLANT_TYPES
         return self.async_show_form(
             step_id="select_pollen",
             data_schema=vol.Schema(
                 {
                     vol.Required(
-                        CONF_POLLEN_CATEGORIES, default=pollen_categories
-                    ): cv.multi_select(pollen_categories),
-                    vol.Required(CONF_POLLEN, default=pollen): cv.multi_select(pollen),
+                        CONF_POLLEN_CATEGORIES, default=self._pollen_categories
+                    ): cv.multi_select(self._pollen_categories),
+                    vol.Required(
+                        CONF_POLLEN, default=self._pollen_types
+                    ): cv.multi_select(self._pollen_types),
                 }
             ),
         )
