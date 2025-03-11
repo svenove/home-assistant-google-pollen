@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
 from .const import BASE_URL, DOMAIN
+from .utils import fetch_pollen_data
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -26,18 +27,13 @@ class GooglePollenDataUpdateCoordinator(DataUpdateCoordinator):
 
     async def _async_update_data(self):
         try:
-            params = {
-                "key": self.api_key,
-                "location.latitude": self.latitude,
-                "location.longitude": self.longitude,
-                "languageCode": self.language,
-                "days": 4,
-                "plantsDescription": "false"
-            }
-            async with aiohttp.ClientSession() as session:
-                async with session.get(BASE_URL, params=params) as response:
-                    response.raise_for_status()
-                    data = await response.json()
+            data = await fetch_pollen_data(
+                api_key=self.api_key,
+                latitude=self.latitude,
+                longitude=self.longitude,
+                language=self.language,
+                days=4
+            )
             
             _LOGGER.debug("Pollen data: %s", data)
 
