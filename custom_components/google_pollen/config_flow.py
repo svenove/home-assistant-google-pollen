@@ -18,6 +18,10 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     VERSION = 1
 
+    def __init__(self):
+        """Initialize the config flow."""
+        self._init_info = {}
+
     async def async_step_user(self, user_input=None):
         """Handle the initial step."""
         errors = {}
@@ -38,10 +42,7 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
                     latitude = float(user_input[CONF_LATITUDE])
                     longitude = float(user_input[CONF_LONGITUDE])
-                 #   return self.async_create_entry(
-                 #       title=f"Pollen ({latitude}, {longitude})",
-                 #       data=user_input
-                 #   )
+                    self._init_info = user_input
                     return await self.async_step_select_pollen()
 
                 except aiohttp.ClientResponseError as error:
@@ -71,8 +72,8 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             self._abort_if_unique_id_configured()
 
             return self.async_create_entry(
-                title=f"Pollen ({latitude}, {longitude})",
-                data=user_input
+                title=f"Pollen ({self._init_info[CONF_LATITUDE]}, {self._init_info[CONF_LONGITUDE]})",
+                data=self._init_info
             )
 
         pollen = PLANT_TYPES
@@ -81,7 +82,6 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema(
                 {
                     vol.Required(CONF_POLLEN, default=pollen): cv.multi_select(pollen)
-
                 }
             )
         )
