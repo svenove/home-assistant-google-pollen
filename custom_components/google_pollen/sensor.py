@@ -9,13 +9,10 @@ from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, CoordinatorEntity
 from homeassistant.util import Throttle
 
-from .const import DOMAIN, DEFAULT_LANGUAGE
+from .const import BASE_URL, DOMAIN, DEFAULT_LANGUAGE
 from .coordinator import GooglePollenDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
-
-BASE_URL = "https://pollen.googleapis.com/v1/forecast:lookup"
-SCAN_INTERVAL = timedelta(hours=4)
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_API_KEY): cv.string,
