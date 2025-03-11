@@ -7,22 +7,22 @@ BASE_URL = "https://pollen.googleapis.com/v1/forecast:lookup"
 
 POLLEN_CATEGORIES = ["GRASS", "TREE", "WEED"]
 PLANT_TYPES = [
-    "BIRCH",
-    "HAZEL",
     "ALDER",
-    "MUGWORT",
     "ASH",
+    "BIRCH",
     "COTTONWOOD",
-    "OAK",
-    "PINE",
-    "OLIVE",
-    "GRAMINALES",
-    "RAGWEED",
-    "ELM",
-    "MAPLE",
-    "JUNIPER",
     "CYPRESS_PINE",
+    "ELM",
+    "GRAMINALES",
+    "HAZEL",
     "JAPANESE_CEDAR",
+    "JUNIPER",
+    "MAPLE",
+    "MUGWORT",
+    "OAK",
+    "OLIVE",
+    "PINE",
+    "RAGWEED",
 ]
 
 CONF_POLLEN_CATEGORIES = "conf_pollen_categories"
