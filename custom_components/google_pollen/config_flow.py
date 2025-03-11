@@ -9,6 +9,7 @@ from homeassistant.core import callback
 import homeassistant.helpers.config_validation as cv
 
 from .const import BASE_URL, DOMAIN, DEFAULT_LANGUAGE
+from .utils import fetch_pollen_data
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -27,21 +28,14 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 errors[CONF_API_KEY] = "invalid_api_key"
             else:
                 try:
-                    async with aiohttp.ClientSession() as session:
-                        params = {
-                            "key": api_key,
-                            "location.latitude": user_input[CONF_LATITUDE],
-                            "location.longitude": user_input[CONF_LONGITUDE],
-                            "languageCode": user_input.get(CONF_LANGUAGE, DEFAULT_LANGUAGE),
-                            "days": 1,
-                            "plantsDescription": "false"
-                        }
-                        async with session.get(BASE_URL, params=params) as response:
-                            response.raise_for_status()
-                            data = await response.json()
+                    data = await fetch_pollen_data(
+                        api_key=api_key,
+                        latitude=user_input[CONF_LATITUDE],
+                        longitude=user_input[CONF_LONGITUDE],
+                        language=user_input.get(CONF_LANGUAGE, DEFAULT_LANGUAGE),
+                        days=1
+                    )
 
-                    _LOGGER.debug("API-result: %s", data)
-                    
                     latitude = float(user_input[CONF_LATITUDE])
                     longitude = float(user_input[CONF_LONGITUDE])
                     return self.async_create_entry(
