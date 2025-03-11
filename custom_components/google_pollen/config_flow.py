@@ -8,7 +8,7 @@ from homeassistant.const import CONF_API_KEY, CONF_LATITUDE, CONF_LONGITUDE, CON
 from homeassistant.core import callback
 import homeassistant.helpers.config_validation as cv
 
-from .const import BASE_URL, DOMAIN, DEFAULT_LANGUAGE, PLANT_TYPES, CONF_POLLEN
+from .const import BASE_URL, DOMAIN, DEFAULT_LANGUAGE, PLANT_TYPES, CONF_POLLEN, CONF_POLLEN_CATEGORIES, POLLEN_CATEGORIES
 from .utils import fetch_pollen_data
 
 _LOGGER = logging.getLogger(__name__)
@@ -67,6 +67,7 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def async_step_select_pollen(self, user_input=None):
         if user_input is not None:
+            self._init_info[CONF_POLLEN_CATEGORIES] = user_input[CONF_POLLEN_CATEGORIES]
             self._init_info[CONF_POLLEN] = user_input[CONF_POLLEN]
             await self.async_set_unique_id(f"{self._init_info[CONF_LATITUDE]}-{self._init_info[CONF_LONGITUDE]}")
             self._abort_if_unique_id_configured()
@@ -76,11 +77,13 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 data=self._init_info
             )
 
+        pollen_categories = POLLEN_CATEGORIES
         pollen = PLANT_TYPES
         return self.async_show_form(
             step_id="select_pollen",
             data_schema=vol.Schema(
                 {
+                    vol.Required(CONF_POLLEN_CATEGORIES, default=pollen_categories): cv.multi_select(pollen_categories),
                     vol.Required(CONF_POLLEN, default=pollen): cv.multi_select(pollen)
                 }
             )
