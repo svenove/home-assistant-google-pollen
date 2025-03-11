@@ -8,7 +8,7 @@ from homeassistant.const import CONF_API_KEY, CONF_LATITUDE, CONF_LONGITUDE, CON
 from homeassistant.core import callback
 import homeassistant.helpers.config_validation as cv
 
-from .const import BASE_URL, DOMAIN, DEFAULT_LANGUAGE
+from .const import BASE_URL, DOMAIN, DEFAULT_LANGUAGE, PLANT_TYPES, CONF_POLLEN
 from .utils import fetch_pollen_data
 
 _LOGGER = logging.getLogger(__name__)
@@ -38,10 +38,12 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
                     latitude = float(user_input[CONF_LATITUDE])
                     longitude = float(user_input[CONF_LONGITUDE])
-                    return self.async_create_entry(
-                        title=f"Pollen ({latitude}, {longitude})",
-                        data=user_input
-                    )
+                 #   return self.async_create_entry(
+                 #       title=f"Pollen ({latitude}, {longitude})",
+                 #       data=user_input
+                 #   )
+                    return await self.async_step_select_pollen()
+
                 except aiohttp.ClientResponseError as error:
                     if error.status == 400:
                         errors[CONF_API_KEY] = "invalid_api_key"
@@ -60,6 +62,28 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 }
             ),
             errors=errors,
+        )
+
+    async def async_step_select_pollen(self, user_input=None):
+        if user_input is not None:
+            self._init_info[CONF_POLLEN] = user_input[CONF_POLLEN]
+            await self.async_set_unique_id(f"{self._init_info[CONF_LATITUDE]}-{self._init_info[CONF_LONGITUDE]}")
+            self._abort_if_unique_id_configured()
+
+            return self.async_create_entry(
+                title=f"Pollen ({latitude}, {longitude})",
+                data=user_input
+            )
+
+        pollen = PLANT_TYPES
+        return self.async_show_form(
+            step_id="select_pollen",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(CONF_POLLEN, default=pollen): cv.multi_select(pollen)
+
+                }
+            )
         )
 
     @staticmethod
@@ -85,12 +109,7 @@ class GooglePollenOptionsFlow(config_entries.OptionsFlow):
             step_id="init",
             data_schema=vol.Schema(
                 {
-                    vol.Optional(
-                        CONF_LANGUAGE,
-                        default=self.config_entry.options.get(
-                            CONF_LANGUAGE, DEFAULT_LANGUAGE
-                        ),
-                    ): cv.language,
+                    vol.Optional(CONF_LANGUAGE, default=self.config_entry.options.get(CONF_LANGUAGE, DEFAULT_LANGUAGE),): cv.language,
                 }
             ),
         )
