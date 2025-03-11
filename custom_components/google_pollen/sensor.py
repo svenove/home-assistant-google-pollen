@@ -9,7 +9,7 @@ from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, CoordinatorEntity
 from homeassistant.util import Throttle
 
-from .const import BASE_URL, DOMAIN, DEFAULT_LANGUAGE
+from .const import BASE_URL, DOMAIN, DEFAULT_LANGUAGE, CONF_POLLEN, PLANT_TYPES
 from .coordinator import GooglePollenDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
@@ -35,7 +35,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     await coordinator.async_config_entry_first_refresh()
 
     pollen_categories = ["GRASS", "TREE", "WEED"]
-    plant_types = ["BIRCH", "HAZEL", "ALDER", "MUGWORT", "ASH", "COTTONWOOD", "OAK", "PINE", "OLIVE", "GRAMINALES", "RAGWEED", "ELM", "MAPLE", "JUNIPER", "CYPRESS_PINE", "JAPANESE_CEDAR"]
+    plant_types = config_entry.data.get(CONF_POLLEN, PLANT_TYPES)
 
     entities = []
     entities.extend([GooglePollenSensor(coordinator, category) for category in pollen_categories])
