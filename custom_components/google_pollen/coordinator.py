@@ -4,11 +4,10 @@ from datetime import datetime, timedelta
 
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
-from .const import DOMAIN
+from .const import BASE_URL, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
-BASE_URL = "https://pollen.googleapis.com/v1/forecast:lookup"
 SCAN_INTERVAL = timedelta(hours=4)
 
 class GooglePollenDataUpdateCoordinator(DataUpdateCoordinator):
