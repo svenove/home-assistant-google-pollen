@@ -137,10 +137,11 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     ],
                     CONF_LANGUAGE: user_input.get(CONF_LANGUAGE, DEFAULT_LANGUAGE)
                 })
-                return self.async_create_entry(
-                    title=f"Pollen ({self._init_info[CONF_LATITUDE]}, {self._init_info[CONF_LONGITUDE]})",
+                self.hass.config_entries.async_update_entry(
+                    self.hass.config_entries.async_get_entry(self.context["entry_id"]),
                     data=self._init_info,
                 )
+                return self.async_abort(reason="reconfigured")
             except aiohttp.ClientResponseError as error:
                 errors["base"] = "api_error"
                 _LOGGER.error("Error fetching pollen data: %s", error)
