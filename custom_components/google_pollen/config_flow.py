@@ -2,6 +2,7 @@
 
 import logging
 import re
+from typing import Any
 
 import aiohttp
 import voluptuous as vol
@@ -32,8 +33,12 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self._init_info = {}
         self._pollen_categories = []
         self._pollen_types = []
+        self._pollen_types_codes = []
+        self._pollen_categories_codes = []
 
-    async def async_step_user(self, user_input=None):
+    async def async_step_user(
+        self, user_input: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         """Handle the initial step."""
         errors = {}
 
@@ -43,33 +48,8 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 errors[CONF_API_KEY] = "invalid_api_key"
             else:
                 try:
-                    pollen_data = await fetch_pollen_data(
-                        api_key=api_key,
-                        latitude=user_input[CONF_LATITUDE],
-                        longitude=user_input[CONF_LONGITUDE],
-                        language=user_input.get(CONF_LANGUAGE, DEFAULT_LANGUAGE),
-                        days=1,
-                    )
-
-                    self._init_info = user_input
-                    self._pollen_categories = [
-                        item["displayName"]
-                        for item in pollen_data["dailyInfo"][0]["pollenTypeInfo"]
-                    ]
-                    self._pollen_types = [
-                        item["displayName"]
-                        for item in pollen_data["dailyInfo"][0]["plantInfo"]
-                    ]
-                    self._pollen_categories_codes = [
-                        item["code"]
-                        for item in pollen_data["dailyInfo"][0]["pollenTypeInfo"]
-                    ]
-                    self._pollen_types_codes = [
-                        item["code"]
-                        for item in pollen_data["dailyInfo"][0]["plantInfo"]
-                    ]
+                    await self._fetch_pollen_data(user_input)
                     return await self.async_step_select_pollen()
-
                 except aiohttp.ClientResponseError as error:
                     if error.status == 400:
                         errors[CONF_API_KEY] = "invalid_api_key"
@@ -94,7 +74,9 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             errors=errors,
         )
 
-    async def async_step_select_pollen(self, user_input=None):
+    async def async_step_select_pollen(
+        self, user_input: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
         """Handle the step to select pollen categories."""
         if user_input is not None:
             self._init_info[CONF_POLLEN_CATEGORIES] = [
@@ -129,35 +111,103 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             ),
         )
 
-    @staticmethod
-    @callback
-    def async_get_options_flow(config_entry):
-        """Get the options flow for this handler."""
-        return GooglePollenOptionsFlow(config_entry)
+    async def async_step_reconfigure(
+        self, user_input: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
+        """Handle the reconfigure step."""
+        errors = {}
 
+        # Initialize self._init_info with the current entry data if not already set
+        if not self._init_info:
+            self._init_info = dict(self.hass.config_entries.async_get_entry(self.context["entry_id"]).data)
 
-class GooglePollenOptionsFlow(config_entries.OptionsFlow):
-    """Handle options."""
+        # Fetch pollen data to populate self._pollen_categories and other attributes
+        await self._fetch_pollen_data(self._init_info, user_input)
 
-    def __init__(self, config_entry):
-        """Initialize options flow."""
-        self.config_entry = config_entry
-
-    async def async_step_init(self, user_input=None):
-        """Manage the options."""
         if user_input is not None:
-            return self.async_create_entry(title="", data=user_input)
+            try:
+                self._init_info.update({
+                    CONF_POLLEN_CATEGORIES: [
+                        self._pollen_categories_codes[self._pollen_categories.index(category)]
+                        for category in user_input[CONF_POLLEN_CATEGORIES]
+                    ],
+                    CONF_POLLEN: [
+                        self._pollen_types_codes[self._pollen_types.index(pollen)]
+                        for pollen in user_input[CONF_POLLEN]
+                    ],
+                    CONF_LANGUAGE: user_input.get(CONF_LANGUAGE, DEFAULT_LANGUAGE)
+                })
+                return self.async_create_entry(
+                    title=f"Pollen ({self._init_info[CONF_LATITUDE]}, {self._init_info[CONF_LONGITUDE]})",
+                    data=self._init_info,
+                )
+            except aiohttp.ClientResponseError as error:
+                errors["base"] = "api_error"
+                _LOGGER.error("Error fetching pollen data: %s", error)
+
+        # Map stored codes back to display names for default values
+        selected_categories = [
+            self._pollen_categories[self._pollen_categories_codes.index(code)]
+            for code in self._init_info.get(CONF_POLLEN_CATEGORIES, [])
+            if code in self._pollen_categories_codes
+        ]
+
+        selected_pollen = [
+            self._pollen_types[self._pollen_types_codes.index(code)]
+            for code in self._init_info.get(CONF_POLLEN, [])
+            if code in self._pollen_types_codes
+        ]
 
         return self.async_show_form(
-            step_id="init",
+            step_id="reconfigure",
             data_schema=vol.Schema(
                 {
-                    vol.Optional(
-                        CONF_LANGUAGE,
-                        default=self.config_entry.options.get(
-                            CONF_LANGUAGE, DEFAULT_LANGUAGE
-                        ),
-                    ): cv.language,
+                    vol.Optional(CONF_LANGUAGE, default=self._init_info.get(CONF_LANGUAGE, DEFAULT_LANGUAGE)): cv.language,
+                    vol.Required(
+                        CONF_POLLEN_CATEGORIES, default=selected_categories
+                    ): cv.multi_select(self._pollen_categories),
+                    vol.Required(
+                        CONF_POLLEN, default=selected_pollen
+                    ): cv.multi_select(self._pollen_types),
                 }
             ),
+            errors=errors,
         )
+
+    async def _fetch_pollen_data(self, init_info: dict[str, Any], user_input: dict[str, Any] | None = None) -> None:
+        """Fetch pollen data from the API."""
+        # Make sure we have all required keys
+        if CONF_API_KEY not in init_info:
+            raise KeyError(f"Missing {CONF_API_KEY} in configuration")
+
+        api_key = init_info[CONF_API_KEY]
+        latitude = init_info[CONF_LATITUDE]
+        longitude = init_info[CONF_LONGITUDE]
+        language = user_input.get(CONF_LANGUAGE, DEFAULT_LANGUAGE) if user_input else init_info.get(CONF_LANGUAGE, DEFAULT_LANGUAGE)
+
+        pollen_data = await fetch_pollen_data(
+            api_key=api_key,
+            latitude=latitude,
+            longitude=longitude,
+            language=language,
+            days=1,
+        )
+
+        self._init_info = init_info.copy()  # Create a copy to avoid modifying the original
+        self._init_info[CONF_LANGUAGE] = language
+        self._pollen_categories = [
+            item["displayName"]
+            for item in pollen_data["dailyInfo"][0]["pollenTypeInfo"]
+        ]
+        self._pollen_types = [
+            item["displayName"]
+            for item in pollen_data["dailyInfo"][0]["plantInfo"]
+        ]
+        self._pollen_categories_codes = [
+            item["code"]
+            for item in pollen_data["dailyInfo"][0]["pollenTypeInfo"]
+        ]
+        self._pollen_types_codes = [
+            item["code"]
+            for item in pollen_data["dailyInfo"][0]["plantInfo"]
+        ]
