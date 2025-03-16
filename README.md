@@ -224,13 +224,32 @@ The integration makes one call per 4 hours + any time you restart Home Assistant
 ### 2. Do I have to register a payment option, if I plan on using less than 5000 requests per month?
 Yes, but you can set a hard limit of request per day, so your sure it's never able to pass 5000 requests/month.
 
+Steps to set a daily limit of API calls in the Google Cloud Console:
+1. Go to the Google Cloud Console.
+2. Select your project or create a new one.
+3. Navigate to the API & Services dashboard.
+4. Click on "Enabled APIs & services".
+5. Select the "Google Pollen API" from the list.
+6. Click on "Quotas" in the sidebar.
+7. Click on the pencil icon next to the "Requests per day" quota.
+8. Set the desired daily limit (e.g., 160 requests per day to stay well below the monthly limit).
+9. Click "Save" to apply the changes.
+
 ### 3. When I look at my entities, they don't seem to have updated?
 The last update show on the entity states is the last time the entity changed value. If the value is the same after updating, the time is not changed. To see the last time the entity was indeed updated, look at the "last updated"-attribute on the entity.
+
+## Known issues/limitations
+### Not possible to change language after setting up a "device"/location
+If you want to change the language of the pollen info, you have to delete the "device"/location and re-add it. The entity names should normally be created with the same names as before, so all dashboards/automations should not be affected.
+
+### After reconfigure, if removing a pollen type, the entity isn't deleted
+Simply delete it manually after reconfigure.
 
 ## Contributions
 Thanks to [@actstorms](https://www.github.com/actstorms) for helping create the config flow (UI, instead of YAML)!
 
 Other contributions are very welcome, just submit a PR! :)
+Especially those mentioned in the "Known issues/limitations", I really would appreciate some assitanec with!
 
 ## License
 
