@@ -22,14 +22,14 @@ jobs:
 
       - name: Create zip
         run: |
-          cd custom_components/google-pollen
+          cd custom_components/google_pollen
           zip google-pollen.zip -r ./
 
       - name: Upload zip to release
         uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ./custom_components/google-pollen/google-pollen.zip
+          file: ./custom_components/google_pollen/google-pollen.zip
           asset_name: google-pollen.zip
           tag: ${{ github.ref }}
           overwrite: true
