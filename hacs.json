@@ -1,5 +1,7 @@
 {
   "name": "Google pollen",
-  "render_readme": true,
+  "homeassistant": "2023.4",
+  "zip_release": true,
+  "filename": "google-pollen.zip",
   "country": ["NO"]
 }
