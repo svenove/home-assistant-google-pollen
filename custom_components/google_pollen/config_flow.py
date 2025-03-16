@@ -47,6 +47,8 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 errors[CONF_API_KEY] = "invalid_api_key"
             else:
                 try:
+                    user_input[CONF_LATITUDE] = round(user_input[CONF_LATITUDE], 4)
+                    user_input[CONF_LONGITUDE] = round(user_input[CONF_LONGITUDE], 4)
                     await self._fetch_pollen_data(user_input)
                     return await self.async_step_select_pollen()
                 except aiohttp.ClientResponseError as error:
