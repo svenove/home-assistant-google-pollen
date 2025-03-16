@@ -11,13 +11,13 @@ def update_manifest():
         if value in ["--version", "-V"]:
             version = sys.argv[index + 1]
 
-    with open(f"{os.getcwd()}/custom_components/google-pollen/manifest.json") as manifestfile:
+    with open(f"{os.getcwd()}/custom_components/google_pollen/manifest.json") as manifestfile:
         manifest = json.load(manifestfile)
 
     manifest["version"] = version
 
     with open(
-            f"{os.getcwd()}/custom_components/google-pollen/manifest.json", "w"
+            f"{os.getcwd()}/custom_components/google_pollen/manifest.json", "w"
     ) as manifestfile:
         manifestfile.write(json.dumps(manifest, indent=4, sort_keys=True))
 
