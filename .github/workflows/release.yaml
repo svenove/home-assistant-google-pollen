@@ -18,7 +18,7 @@ jobs:
 
       - name: "Set version number"
         run: |
-          python3 ${{ github.workspace }}/manage/update_manifest.py --version ${{ steps.version.outputs.version }}
+          python3 ${{ github.workspace }}/update_manifest.py --version ${{ steps.version.outputs.version }}
 
       - name: Create zip
         run: |
