@@ -17,8 +17,8 @@ A Home Assistant custom component to fetch pollen data from the Google Pollen AP
 - [Usage](#usage)
   - [Devices/entities](#devicesentities)
   - [Frontend card](#frontend-card)
-- [Apex chart](#apex-chart)
-- [Frontend chips card](#frontend-chips-card)
+  - [Apex chart](#apex-chart)
+  - [Frontend chips card](#frontend-chips-card)
 - [FAQ](#faq)
 - [Known issues/limitations](#known-issueslimitations)
 - [Contributions](#contributions)
@@ -134,7 +134,7 @@ cards:
       {% endif %}
 ```
 
-## Apex chart
+### Apex chart
 Inspired by @vdbrink (https://vdbrink.github.io/homeassistant/homeassistant_hacs_kleenex.html), I made an example on how to display this in a card in a dashboard - like the screenshot at the top.
 
 You'll need the [Apex chart cards](https://github.com/RomRider/apexcharts-card) installed for these to work.
@@ -190,7 +190,7 @@ apex_config:
     position: bottom
 ```
 
-## Frontend chips card
+### Frontend chips card
 You can also create a "chip card", that displays a color based on UPI and the UPI-index value for the pollen type with highest value. This can be adjusted to only take into consideration the pollen types you want (inestead of all of them).
 
 You'll need the [Mushroom cards](https://github.com/piitaya/lovelace-mushroom) installed for these to work as well.
