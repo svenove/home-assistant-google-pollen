@@ -2,8 +2,6 @@
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/svenove/home-assistant-google-pollen/hassfest.yaml)
 ![GitHub issue custom search in repo](https://img.shields.io/github/issues-search/svenove/home-assistant-google-pollen?query=label%3Abug%20is%3Aopen&label=bugs)
 ![GitHub Release](https://img.shields.io/github/v/release/svenove/home-assistant-google-pollen)
-![Github downloads total](https://img.shields.io/github/downloads/svenove/home-assistant-google-pollen/total)
-![Github downloads latest](https://img.shields.io/github/downloads/svenove/home-assistant-google-pollen/latest/total)
 [![Buy me a coffee](https://img.shields.io/badge/Buy_me_a_coffee-ffdd00?logo=buy-me-a-coffee&logoColor=black&logoSize=auto)](https://www.buymeacoffee.com/svenove)
 
 A Home Assistant custom component to fetch pollen data from the Google Pollen API. 
@@ -217,6 +215,17 @@ chips:
       action: navigate
       navigation_path: /dashboard-mushroom/pollen
   ```
+
+## FAQ
+### 1. Is the Google Pollen API free to use?
+Yes, there's a limit of 5000 requests per month before you have to pay anyting ([source](https://developers.google.com/maps/documentation/pollen/usage-and-billing)).
+The integration makes one call per 4 hours + any time you restart Home Assistant. Well below 5000 requests/month!
+
+### 2. Do I have to register a payment option, if I plan on using less than 5000 requests per month?
+Yes, but you can set a hard limit of request per day, so your sure it's never able to pass 5000 requests/month.
+
+### 3. When I look at my entities, they don't seem to have updated?
+The last update show on the entity states is the last time the entity changed value. If the value is the same after updating, the time is not changed. To see the last time the entity was indeed updated, look at the "last updated"-attribute on the entity.
 
 ## Contributions
 Thanks to [@actstorms](https://www.github.com/actstorms) for helping create the config flow (UI, instead of YAML)!
