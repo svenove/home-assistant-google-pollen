@@ -8,6 +8,22 @@ A Home Assistant custom component to fetch pollen data from the Google Pollen AP
 
 ![{B9AF4ACF-3D62-44B3-B8AE-98E4311B7C32}](https://github.com/user-attachments/assets/2b567fdf-c4b4-4cca-8290-9ef166ec90cf)
 
+## Table of contents
+- [Installation](#installation)
+  - [HACS (Home Assistant Community Store)](#hacs-home-assistant-community-store)
+  - [Manual Installation](#manual-installation)
+- [Configuration](#configuration)
+- [Obtaining Google Pollen API Key](#obtaining-google-pollen-api-key)
+- [Usage](#usage)
+  - [Devices/entities](#devicesentities)
+  - [Frontend card](#frontend-card)
+- [Apex chart](#apex-chart)
+- [Frontend chips card](#frontend-chips-card)
+- [FAQ](#faq)
+- [Known issues/limitations](#known-issueslimitations)
+- [Contributions](#contributions)
+- [License](#license)
+- [Terms of use and privacy policy](#terms-of-use-and-privacy-policy)
 
 ## Installation
 
