@@ -14,7 +14,6 @@ from homeassistant.const import (
     CONF_LATITUDE,
     CONF_LONGITUDE,
 )
-from homeassistant.core import callback
 import homeassistant.helpers.config_validation as cv
 
 from .const import CONF_POLLEN, CONF_POLLEN_CATEGORIES, DEFAULT_LANGUAGE, DOMAIN
@@ -63,10 +62,10 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 {
                     vol.Required(CONF_API_KEY): cv.string,
                     vol.Required(
-                        CONF_LATITUDE, default=self.hass.config.latitude
+                        CONF_LATITUDE, default=round(self.hass.config.latitude, 4)
                     ): cv.latitude,
                     vol.Required(
-                        CONF_LONGITUDE, default=self.hass.config.longitude
+                        CONF_LONGITUDE, default=round(self.hass.config.longitude, 4)
                     ): cv.longitude,
                     vol.Optional(CONF_LANGUAGE, default=DEFAULT_LANGUAGE): cv.language,
                 }
@@ -141,7 +140,8 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     self.hass.config_entries.async_get_entry(self.context["entry_id"]),
                     data=self._init_info,
                 )
-                return self.async_abort(reason="reconfigured")
+                return self.async_update_reload_and_abort(self.hass.config_entries.async_get_entry(self.context["entry_id"]),
+                                                          reason="reconfigured")
             except aiohttp.ClientResponseError as error:
                 errors["base"] = "api_error"
                 _LOGGER.error("Error fetching pollen data: %s", error)
@@ -177,7 +177,6 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     async def _fetch_pollen_data(self, init_info: dict[str, Any], user_input: dict[str, Any] | None = None) -> None:
         """Fetch pollen data from the API."""
-        # Make sure we have all required keys
         if CONF_API_KEY not in init_info:
             raise KeyError(f"Missing {CONF_API_KEY} in configuration")
 
@@ -194,7 +193,7 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             days=1,
         )
 
-        self._init_info = init_info.copy()  # Create a copy to avoid modifying the original
+        self._init_info = init_info.copy()
         self._init_info[CONF_LANGUAGE] = language
         self._pollen_categories = [
             item["displayName"]
