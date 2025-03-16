@@ -2,6 +2,8 @@
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/svenove/home-assistant-google-pollen/hassfest.yaml)
 ![GitHub issue custom search in repo](https://img.shields.io/github/issues-search/svenove/home-assistant-google-pollen?query=label%3Abug%20is%3Aopen&label=bugs)
 ![GitHub Release](https://img.shields.io/github/v/release/svenove/home-assistant-google-pollen)
+![Github downloads total](https://img.shields.io/github/downloads/svenove/home-assistant-google-pollen/total)
+![Github downloads latest](https://img.shields.io/github/downloads/svenove/home-assistant-google-pollen/latest/total)
 [![Buy me a coffee](https://img.shields.io/badge/Buy_me_a_coffee-ffdd00?logo=buy-me-a-coffee&logoColor=black&logoSize=auto)](https://www.buymeacoffee.com/svenove)
 
 A Home Assistant custom component to fetch pollen data from the Google Pollen API. 
