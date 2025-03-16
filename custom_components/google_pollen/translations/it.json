@@ -1,0 +1,47 @@
+{
+    "title": "Google Pollen",
+    "config": {
+        "step": {
+            "user": {
+                "title": "Configura Google Pollen",
+                "description": "Configura l'integrazione di Google Pollen.",
+                "data": {
+                    "api_key": "Chiave API",
+                    "language": "Lingua",
+                    "latitude": "Latitudine",
+                    "longitude": "Longitudine"
+                }
+            },
+            "select_pollen": {
+                "title": "Seleziona Pollen",
+                "description": "Seleziona categorie e tipi di polline",
+                "data": {
+                    "conf_pollen_categories": "Categorie di Polline",
+                    "conf_pollen": "Tipi di Polline"
+                }
+            },
+            "reconfigure": {
+                "title": "Riconfigura Google Pollen",
+                "description": "Riconfigura l'integrazione di Google Pollen.",
+                "data": {
+                    "api_key": "Chiave API",
+                    "language": "Lingua",
+                    "latitude": "Latitudine",
+                    "longitude": "Longitudine",
+                    "conf_pollen_categories": "Categorie di Polline",
+                    "conf_pollen": "Tipi di Polline"
+                }
+            }
+        },
+        "error": {
+            "invalid_api_key": "Chiave API non valida",
+            "cannot_connect": "Impossibile connettersi al servizio Google Pollen",
+            "unknown": "Errore sconosciuto",
+            "timeout": "Tempo di connessione al servizio scaduto"
+        },
+        "abort": {
+            "already_configured": "Questa posizione è già configurata",
+            "no_pollen_data": "Nessun dato di polline disponibile per questa posizione"
+        }
+    }
+}

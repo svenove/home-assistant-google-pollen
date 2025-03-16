@@ -1,0 +1,43 @@
+{
+    "title": "Google Pollen",
+    "config": {
+        "step": {
+            "user": {
+                "title": "Konfigurera Google Pollen",
+                "description": "Konfigurera Google Pollen-integrationen.",
+                "data": {
+                    "api_key": "API-nyckel",
+                    "language": "Språk",
+                    "latitude": "Latitud",
+                    "longitude": "Longitud"
+                }
+            },
+            "select_pollen": {
+                "title": "Välj pollen",
+                "description": "Välj pollenkategorier och pollentyper",
+                "data": {
+                    "conf_pollen_categories": "Pollenkategorier",
+                    "conf_pollen": "Pollentyper"
+                }
+            },
+            "reconfigure": {
+                "title": "Omkonfigurera Google Pollen",
+                "description": "Omkonfigurera Google Pollen-integrationen.",
+                "data": {
+                    "conf_pollen_categories": "Pollenkategorier",
+                    "conf_pollen": "Pollentyper"
+                }
+            }
+        },
+        "error": {
+            "invalid_api_key": "Ogiltig API-nyckel",
+            "cannot_connect": "Kan inte ansluta till Google Pollen-tjänsten",
+            "unknown": "Okänt fel",
+            "timeout": "Anslutningen till tjänsten tog för lång tid"
+        },
+        "abort": {
+            "already_configured": "Denna plats är redan konfigurerad",
+            "no_pollen_data": "Ingen pollendata tillgänglig för denna plats"
+        }
+    }
+}

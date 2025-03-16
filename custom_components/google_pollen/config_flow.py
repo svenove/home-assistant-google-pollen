@@ -134,8 +134,8 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     CONF_POLLEN: [
                         self._pollen_types_codes[self._pollen_types.index(pollen)]
                         for pollen in user_input[CONF_POLLEN]
-                    ],
-                    CONF_LANGUAGE: user_input.get(CONF_LANGUAGE, DEFAULT_LANGUAGE)
+                    ]
+                    #CONF_LANGUAGE: user_input.get(CONF_LANGUAGE, DEFAULT_LANGUAGE)
                 })
                 self.hass.config_entries.async_update_entry(
                     self.hass.config_entries.async_get_entry(self.context["entry_id"]),
@@ -163,7 +163,7 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             step_id="reconfigure",
             data_schema=vol.Schema(
                 {
-                    vol.Optional(CONF_LANGUAGE, default=self._init_info.get(CONF_LANGUAGE, DEFAULT_LANGUAGE)): cv.language,
+                    #vol.Optional(CONF_LANGUAGE, default=self._init_info.get(CONF_LANGUAGE, DEFAULT_LANGUAGE)): cv.language,
                     vol.Required(
                         CONF_POLLEN_CATEGORIES, default=selected_categories
                     ): cv.multi_select(self._pollen_categories),

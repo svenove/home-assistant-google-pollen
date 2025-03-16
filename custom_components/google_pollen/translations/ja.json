@@ -1,0 +1,47 @@
+{
+    "title": "Google Pollen",
+    "config": {
+        "step": {
+            "user": {
+                "title": "Google Pollen を設定する",
+                "description": "Google Pollen 統合を設定します。",
+                "data": {
+                    "api_key": "API キー",
+                    "language": "言語",
+                    "latitude": "緯度",
+                    "longitude": "経度"
+                }
+            },
+            "select_pollen": {
+                "title": "花粉を選択",
+                "description": "花粉のカテゴリとタイプを選択します",
+                "data": {
+                    "conf_pollen_categories": "花粉のカテゴリ",
+                    "conf_pollen": "花粉のタイプ"
+                }
+            },
+            "reconfigure": {
+                "title": "Google Pollen を再設定する",
+                "description": "Google Pollen 統合を再設定します。",
+                "data": {
+                    "api_key": "API キー",
+                    "language": "言語",
+                    "latitude": "緯度",
+                    "longitude": "経度",
+                    "conf_pollen_categories": "花粉のカテゴリ",
+                    "conf_pollen": "花粉のタイプ"
+                }
+            }
+        },
+        "error": {
+            "invalid_api_key": "無効な API キー",
+            "cannot_connect": "Google Pollen サービスに接続できません",
+            "unknown": "不明なエラー",
+            "timeout": "サービスへの接続がタイムアウトしました"
+        },
+        "abort": {
+            "already_configured": "この場所は既に設定されています",
+            "no_pollen_data": "この場所には利用可能な花粉データがありません"
+        }
+    }
+}

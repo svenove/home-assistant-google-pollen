@@ -1,0 +1,47 @@
+{
+    "title": "Google Pollen",
+    "config": {
+        "step": {
+            "user": {
+                "title": "Google Pollen 설정",
+                "description": "Google Pollen 통합을 설정합니다.",
+                "data": {
+                    "api_key": "API 키",
+                    "language": "언어",
+                    "latitude": "위도",
+                    "longitude": "경도"
+                }
+            },
+            "select_pollen": {
+                "title": "꽃가루 선택",
+                "description": "꽃가루 카테고리 및 유형을 선택합니다",
+                "data": {
+                    "conf_pollen_categories": "꽃가루 카테고리",
+                    "conf_pollen": "꽃가루 유형"
+                }
+            },
+            "reconfigure": {
+                "title": "Google Pollen 재설정",
+                "description": "Google Pollen 통합을 재설정합니다.",
+                "data": {
+                    "api_key": "API 키",
+                    "language": "언어",
+                    "latitude": "위도",
+                    "longitude": "경도",
+                    "conf_pollen_categories": "꽃가루 카테고리",
+                    "conf_pollen": "꽃가루 유형"
+                }
+            }
+        },
+        "error": {
+            "invalid_api_key": "잘못된 API 키",
+            "cannot_connect": "Google Pollen 서비스에 연결할 수 없습니다",
+            "unknown": "알 수 없는 오류",
+            "timeout": "서비스 연결 시간 초과"
+        },
+        "abort": {
+            "already_configured": "이 위치는 이미 설정되어 있습니다",
+            "no_pollen_data": "이 위치에 사용할 수 있는 꽃가루 데이터가 없습니다"
+        }
+    }
+}

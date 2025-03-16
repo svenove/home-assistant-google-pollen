@@ -1,0 +1,47 @@
+{
+    "title": "Google Pollen",
+    "config": {
+        "step": {
+            "user": {
+                "title": "配置 Google Pollen",
+                "description": "配置 Google Pollen 集成。",
+                "data": {
+                    "api_key": "API 密钥",
+                    "language": "语言",
+                    "latitude": "纬度",
+                    "longitude": "经度"
+                }
+            },
+            "select_pollen": {
+                "title": "选择花粉",
+                "description": "选择花粉类别和类型",
+                "data": {
+                    "conf_pollen_categories": "花粉类别",
+                    "conf_pollen": "花粉类型"
+                }
+            },
+            "reconfigure": {
+                "title": "重新配置 Google Pollen",
+                "description": "重新配置 Google Pollen 集成。",
+                "data": {
+                    "api_key": "API 密钥",
+                    "language": "语言",
+                    "latitude": "纬度",
+                    "longitude": "经度",
+                    "conf_pollen_categories": "花粉类别",
+                    "conf_pollen": "花粉类型"
+                }
+            }
+        },
+        "error": {
+            "invalid_api_key": "无效的 API 密钥",
+            "cannot_connect": "无法连接到 Google Pollen 服务",
+            "unknown": "未知错误",
+            "timeout": "连接服务超时"
+        },
+        "abort": {
+            "already_configured": "此位置已配置",
+            "no_pollen_data": "此位置没有可用的花粉数据"
+        }
+    }
+}
