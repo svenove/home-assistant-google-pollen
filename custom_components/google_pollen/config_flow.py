@@ -21,7 +21,7 @@ from .utils import fetch_pollen_data
 
 _LOGGER = logging.getLogger(__name__)
 
-CONFIG_SCHEMA = cv.config_entry_only_schema(DOMAIN)
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Google Pollen."""
