@@ -1,0 +1,37 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  release_zip_file:
+    name: Prepare release asset
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+
+      - name: Get version
+        id: version
+        uses: home-assistant/actions/helpers/version@master
+
+      - name: "Set version number"
+        run: |
+          python3 ${{ github.workspace }}/update_manifest.py --version ${{ steps.version.outputs.version }}
+
+      - name: Create zip
+        run: |
+          cd custom_components/google_pollen
+          zip google-pollen.zip -r ./
+
+      - name: Upload zip to release
+        uses: svenstaro/upload-release-action@v1-release
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ./custom_components/google_pollen/google-pollen.zip
+          asset_name: google-pollen.zip
+          tag: ${{ github.ref }}
+          overwrite: true

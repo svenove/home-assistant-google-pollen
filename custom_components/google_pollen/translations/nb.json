@@ -1,0 +1,43 @@
+{
+    "title": "Google Pollen",
+    "config": {
+        "step": {
+            "user": {
+                "title": "Konfigurer Google Pollen",
+                "description": "Konfigurer Google Pollen integrasjonen.",
+                "data": {
+                    "api_key": "API-nøkkel",
+                    "language": "Språk",
+                    "latitude": "Breddegrad",
+                    "longitude": "Lengdegrad"
+                }
+            },
+            "select_pollen": {
+                "title": "Velg pollen",
+                "description": "Velg pollenkategorier og pollentyper",
+                "data": {
+                    "conf_pollen_categories": "Pollenkategorier",
+                    "conf_pollen": "Pollentyper"
+                }
+            },
+            "reconfigure": {
+                "title": "Rekonfigurer Google Pollen",
+                "description": "Rekonfigurer Google Pollen integrasjonen.",
+                "data": {
+                    "conf_pollen_categories": "Pollenkategorier",
+                    "conf_pollen": "Pollentyper"
+                }
+            }
+        },
+        "error": {
+            "invalid_api_key": "Ugyldig API-nøkkel",
+            "cannot_connect": "Kan ikke koble til Google Pollen tjenesten",
+            "unknown": "Ukjent feil",
+            "timeout": "Tidsavbrudd ved tilkobling til tjenesten"
+        },
+        "abort": {
+            "already_configured": "Denne lokasjonen er allerede konfigurert",
+            "no_pollen_data": "Ingen pollendata tilgjengelig for denne lokasjonen"
+        }
+    }
+}

@@ -8,6 +8,22 @@ A Home Assistant custom component to fetch pollen data from the Google Pollen AP
 
 ![{B9AF4ACF-3D62-44B3-B8AE-98E4311B7C32}](https://github.com/user-attachments/assets/2b567fdf-c4b4-4cca-8290-9ef166ec90cf)
 
+## Table of contents
+- [Installation](#installation)
+  - [HACS (Home Assistant Community Store)](#hacs-home-assistant-community-store)
+  - [Manual Installation](#manual-installation)
+- [Configuration](#configuration)
+- [Obtaining Google Pollen API Key](#obtaining-google-pollen-api-key)
+- [Usage](#usage)
+  - [Devices/entities](#devicesentities)
+  - [Frontend card](#frontend-card)
+  - [Apex chart](#apex-chart)
+  - [Frontend chips card](#frontend-chips-card)
+- [FAQ](#faq)
+- [Known issues/limitations](#known-issueslimitations)
+- [Contributions](#contributions)
+- [License](#license)
+- [Terms of use and privacy policy](#terms-of-use-and-privacy-policy)
 
 ## Installation
 
@@ -22,8 +38,8 @@ A Home Assistant custom component to fetch pollen data from the Google Pollen AP
 
 ### Manual Installation
 
-1. Download the `custom_components` folder from this repository.
-2. Copy the `google_pollen` directory into your Home Assistant's `custom_components` directory.
+1. Download the `google-pollen.zip` from the releases.
+2. Copy the `google_pollen` directory from the ZIP-file into your Home Assistant's `custom_components` directory.
 3. Restart Home Assistant.
 
 ## Configuration
@@ -35,6 +51,8 @@ Simply add the integration and fill out the details:
 - `latitude`: Latitude of the location you want to monitor (defaults to your configured home latitude).
 - `longitude`: Longitude of the location you want to monitor (defaults to your configured home longitude).
 - `language`: (Optional) Language code for the data (default is `en`).
+
+You'll then be asked to select the pollen categories and pollen types you want to add entities for. Please note that to add/remove entities later, you have to delete the service/location and re-add it (no "reconfigure"-option available)!
 
 Tip: you can add multiple locations - perhaps one for home and one for the summer cabin?
 
@@ -118,7 +136,7 @@ cards:
       {% endif %}
 ```
 
-## Apex chart
+### Apex chart
 Inspired by @vdbrink (https://vdbrink.github.io/homeassistant/homeassistant_hacs_kleenex.html), I made an example on how to display this in a card in a dashboard - like the screenshot at the top.
 
 You'll need the [Apex chart cards](https://github.com/RomRider/apexcharts-card) installed for these to work.
@@ -174,7 +192,7 @@ apex_config:
     position: bottom
 ```
 
-## Frontend chips card
+### Frontend chips card
 You can also create a "chip card", that displays a color based on UPI and the UPI-index value for the pollen type with highest value. This can be adjusted to only take into consideration the pollen types you want (inestead of all of them).
 
 You'll need the [Mushroom cards](https://github.com/piitaya/lovelace-mushroom) installed for these to work as well.
@@ -216,10 +234,44 @@ chips:
       navigation_path: /dashboard-mushroom/pollen
   ```
 
+## FAQ
+### 1. Is the Google Pollen API free to use?
+Yes, there's a limit of 5000 requests per month before you have to pay anyting ([source](https://developers.google.com/maps/documentation/pollen/usage-and-billing)).
+The integration makes one call per 4 hours + any time you restart Home Assistant. Well below 5000 requests/month!
+
+### 2. Do I have to register a payment option, if I plan on using less than 5000 requests per month?
+Yes, but you can set a hard limit of request per day, so your sure it's never able to pass 5000 requests/month.
+
+Steps to set a daily limit of API calls in the Google Cloud Console:
+1. Go to the Google Cloud Console.
+2. Select your project or create a new one.
+3. Navigate to the API & Services dashboard.
+4. Click on "Enabled APIs & services".
+5. Select the "Google Pollen API" from the list.
+6. Click on "Quotas" in the sidebar.
+7. Click on the pencil icon next to the "Requests per day" quota.
+8. Set the desired daily limit (e.g., 160 requests per day to stay well below the monthly limit).
+9. Click "Save" to apply the changes.
+
+### 3. When I look at my entities, they don't seem to have updated?
+The last update show on the entity states is the last time the entity changed value. If the value is the same after updating, the time is not changed. To see the last time the entity was indeed updated, look at the "last updated"-attribute on the entity.
+
+## Known issues/limitations
+### Not possible to change language after setting up a "service"/location
+If you want to change the language of the pollen info, you have to delete the "service"/location and re-add it. The entity names should normally be created with the same names as before, so all dashboards/automations should not be affected.
+
+### Not possible to add/remove pollen types/categories (aka "reconfigure") after setting up a "service"/location
+I've been trying to add `async_step_reconfigure` (like described [here](https://developers.home-assistant.io/docs/core/integration-quality-scale/rules/reconfiguration-flow/)), but have not been able to make it work. It's the combination of the APIs "code-name" for the pollen types/categories and the localized "display name" that seems to be causing some issues I haven't been able to figure out. 
+Currently, just delete the service/location and re-add it if you want to select more or less pollen types/categories. 
+
+### The entity IDs are localized
+The entities are given IDs like "sensor.google_pollen_<pollen-type>", but with "pollen type" localized to the language selected. This means that the IDs are different per language and that it's not easy to copy/paste a dashboard card between languages since the IDs are different. The best would be that the IDs are always named after the English name, but that the display name is localized. This is on my todo-list.
+
 ## Contributions
 Thanks to [@actstorms](https://www.github.com/actstorms) for helping create the config flow (UI, instead of YAML)!
 
 Other contributions are very welcome, just submit a PR! :)
+Especially those mentioned in the "Known issues/limitations", I really would appreciate some assistance with!
 
 ## License
 

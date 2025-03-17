@@ -1,0 +1,47 @@
+{
+    "title": "Google Pollen",
+    "config": {
+        "step": {
+            "user": {
+                "title": "Google Pollen konfigurieren",
+                "description": "Konfigurieren Sie die Google Pollen-Integration.",
+                "data": {
+                    "api_key": "API-Schlüssel",
+                    "language": "Sprache",
+                    "latitude": "Breitengrad",
+                    "longitude": "Längengrad"
+                }
+            },
+            "select_pollen": {
+                "title": "Pollen auswählen",
+                "description": "Wählen Sie Pollenkategorien und -typen aus",
+                "data": {
+                    "conf_pollen_categories": "Pollenkategorien",
+                    "conf_pollen": "Pollentypen"
+                }
+            },
+            "reconfigure": {
+                "title": "Google Pollen reconfigurieren",
+                "description": "Rekonfigurieren Sie die Google Pollen-Integration.",
+                "data": {
+                    "api_key": "API-Schlüssel",
+                    "language": "Sprache",
+                    "latitude": "Breitengrad",
+                    "longitude": "Längengrad",
+                    "conf_pollen_categories": "Pollenkategorien",
+                    "conf_pollen": "Pollentypen"
+                }
+            }
+        },
+        "error": {
+            "invalid_api_key": "Ungültiger API-Schlüssel",
+            "cannot_connect": "Verbindung zum Google Pollen-Dienst nicht möglich",
+            "unknown": "Unbekannter Fehler",
+            "timeout": "Zeitüberschreitung bei der Verbindung zum Dienst"
+        },
+        "abort": {
+            "already_configured": "Dieser Standort ist bereits konfiguriert",
+            "no_pollen_data": "Keine Pollendaten für diesen Standort verfügbar"
+        }
+    }
+}

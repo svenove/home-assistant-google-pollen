@@ -1,0 +1,47 @@
+{
+    "title": "Google Pollen",
+    "config": {
+        "step": {
+            "user": {
+                "title": "Google Pollen configureren",
+                "description": "Configureer de Google Pollen-integratie.",
+                "data": {
+                    "api_key": "API-sleutel",
+                    "language": "Taal",
+                    "latitude": "Breedtegraad",
+                    "longitude": "Lengtegraad"
+                }
+            },
+            "select_pollen": {
+                "title": "Selecteer Pollen",
+                "description": "Selecteer pollencategorieën en -typen",
+                "data": {
+                    "conf_pollen_categories": "Pollencategorieën",
+                    "conf_pollen": "Pollentypen"
+                }
+            },
+            "reconfigure": {
+                "title": "Google Pollen opnieuw configureren",
+                "description": "Configureer de Google Pollen-integratie opnieuw.",
+                "data": {
+                    "api_key": "API-sleutel",
+                    "language": "Taal",
+                    "latitude": "Breedtegraad",
+                    "longitude": "Lengtegraad",
+                    "conf_pollen_categories": "Pollencategorieën",
+                    "conf_pollen": "Pollentypen"
+                }
+            }
+        },
+        "error": {
+            "invalid_api_key": "Ongeldige API-sleutel",
+            "cannot_connect": "Kan geen verbinding maken met de Google Pollen-service",
+            "unknown": "Onbekende fout",
+            "timeout": "Verbinding met de service is verlopen"
+        },
+        "abort": {
+            "already_configured": "Deze locatie is al geconfigureerd",
+            "no_pollen_data": "Geen pollengegevens beschikbaar voor deze locatie"
+        }
+    }
+}

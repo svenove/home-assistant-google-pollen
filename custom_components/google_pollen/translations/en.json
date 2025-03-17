@@ -1,0 +1,43 @@
+{
+    "title": "Google Pollen",
+    "config": {
+        "step": {
+            "user": {
+                "title": "Configure Google Pollen",
+                "description": "Configure the Google Pollen integration.",
+                "data": {
+                    "api_key": "API Key",
+                    "language": "Language",
+                    "latitude": "Latitude",
+                    "longitude": "Longitude"
+                }
+            },
+            "select_pollen": {
+                "title": "Select Pollen",
+                "description": "Select pollen categories and types",
+                "data": {
+                    "conf_pollen_categories": "Pollen categories",
+                    "conf_pollen": "Pollen types"
+                }
+            },
+            "reconfigure": {
+                "title": "Reconfigure Google Pollen",
+                "description": "Reconfigure the Google Pollen integration.",
+                "data": {
+                    "conf_pollen_categories": "Pollen categories",
+                    "conf_pollen": "Pollen types"
+                }
+            }
+        },
+        "error": {
+            "invalid_api_key": "Invalid API Key",
+            "cannot_connect": "Cannot connect to Google Pollen service",
+            "unknown": "Unknown error",
+            "timeout": "Connection to the service timed out"
+        },
+        "abort": {
+            "already_configured": "This location is already configured",
+            "no_pollen_data": "No pollen data available for this location"
+        }
+    }
+}
