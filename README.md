@@ -52,6 +52,8 @@ Simply add the integration and fill out the details:
 - `longitude`: Longitude of the location you want to monitor (defaults to your configured home longitude).
 - `language`: (Optional) Language code for the data (default is `en`).
 
+You'll then be asked to select the pollen categories and pollen types you want to add entities for. Please note that to add/remove entities later, you have to delete the service/location and re-add it (no "reconfigure"-option available)!
+
 Tip: you can add multiple locations - perhaps one for home and one for the summer cabin?
 
 ## Obtaining Google Pollen API Key
@@ -255,17 +257,21 @@ Steps to set a daily limit of API calls in the Google Cloud Console:
 The last update show on the entity states is the last time the entity changed value. If the value is the same after updating, the time is not changed. To see the last time the entity was indeed updated, look at the "last updated"-attribute on the entity.
 
 ## Known issues/limitations
-### Not possible to change language after setting up a "device"/location
-If you want to change the language of the pollen info, you have to delete the "device"/location and re-add it. The entity names should normally be created with the same names as before, so all dashboards/automations should not be affected.
+### Not possible to change language after setting up a "service"/location
+If you want to change the language of the pollen info, you have to delete the "service"/location and re-add it. The entity names should normally be created with the same names as before, so all dashboards/automations should not be affected.
 
-### After reconfigure, if removing a pollen type, the entity isn't deleted
-Simply delete it manually after reconfigure.
+### Not possible to add/remove pollen types/categories (aka "reconfigure") after setting up a "service"/location
+I've been trying to add `async_step_reconfigure` (like described [here](https://developers.home-assistant.io/docs/core/integration-quality-scale/rules/reconfiguration-flow/)), but have not been able to make it work. It's the combination of the APIs "code-name" for the pollen types/categories and the localized "display name" that seems to be causing some issues I haven't been able to figure out. 
+Currently, just delete the service/location and re-add it if you want to select more or less pollen types/categories. 
+
+### The entity IDs are localized
+The entities are given IDs like "sensor.google_pollen_<pollen-type>", but with "pollen type" localized to the language selected. This means that the IDs are different per language and that it's not easy to copy/paste a dashboard card between languages since the IDs are different. The best would be that the IDs are always named after the English name, but that the display name is localized. This is on my todo-list.
 
 ## Contributions
 Thanks to [@actstorms](https://www.github.com/actstorms) for helping create the config flow (UI, instead of YAML)!
 
 Other contributions are very welcome, just submit a PR! :)
-Especially those mentioned in the "Known issues/limitations", I really would appreciate some assitanec with!
+Especially those mentioned in the "Known issues/limitations", I really would appreciate some assistance with!
 
 ## License
 
