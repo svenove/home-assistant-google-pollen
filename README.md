@@ -38,8 +38,8 @@ A Home Assistant custom component to fetch pollen data from the Google Pollen AP
 
 ### Manual Installation
 
-1. Download the `custom_components` folder from this repository.
-2. Copy the `google_pollen` directory into your Home Assistant's `custom_components` directory.
+1. Download the `google-pollen.zip` from the releases.
+2. Copy the `google_pollen` directory from the ZIP-file into your Home Assistant's `custom_components` directory.
 3. Restart Home Assistant.
 
 ## Configuration
