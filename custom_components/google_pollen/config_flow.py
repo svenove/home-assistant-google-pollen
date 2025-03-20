@@ -21,7 +21,6 @@ from .utils import fetch_pollen_data
 
 _LOGGER = logging.getLogger(__name__)
 
-CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Google Pollen."""
@@ -31,10 +30,8 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     def __init__(self):
         """Initialize the config flow."""
         self._init_info = {}
-        self._pollen_categories = []
-        self._pollen_types = []
-        self._pollen_types_codes = []
-        self._pollen_categories_codes = []
+        self._pollen_list = []
+        self._pollen_categories_list = []
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
@@ -70,7 +67,7 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     vol.Required(
                         CONF_LONGITUDE, default=round(self.hass.config.longitude, 4)
                     ): cv.longitude,
-                    vol.Optional(CONF_LANGUAGE, default=DEFAULT_LANGUAGE): cv.language,
+                    vol.Required(CONF_LANGUAGE, default=DEFAULT_LANGUAGE): cv.language,
                 }
             ),
             errors=errors,
@@ -80,15 +77,11 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self, user_input: dict[str, Any] | None = None
     ) -> dict[str, Any]:
         """Handle the step to select pollen categories."""
+
         if user_input is not None:
-            self._init_info[CONF_POLLEN_CATEGORIES] = [
-                self._pollen_categories_codes[self._pollen_categories.index(category)]
-                for category in user_input[CONF_POLLEN_CATEGORIES]
-            ]
-            self._init_info[CONF_POLLEN] = [
-                self._pollen_types_codes[self._pollen_types.index(pollen)]
-                for pollen in user_input[CONF_POLLEN]
-            ]
+            self._init_info[CONF_POLLEN_CATEGORIES] = user_input[CONF_POLLEN_CATEGORIES]
+            self._init_info[CONF_POLLEN] = user_input[CONF_POLLEN]
+
             await self.async_set_unique_id(
                 f"{self._init_info[CONF_LATITUDE]}-{self._init_info[CONF_LONGITUDE]}"
             )
@@ -104,16 +97,19 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema(
                 {
                     vol.Required(
-                        CONF_POLLEN_CATEGORIES, default=self._pollen_categories
-                    ): cv.multi_select(self._pollen_categories),
+                        CONF_POLLEN_CATEGORIES,
+                        default=list(self._pollen_categories_list.keys()),
+                    ): cv.multi_select(self._pollen_categories_list),
                     vol.Required(
-                        CONF_POLLEN, default=self._pollen_types
-                    ): cv.multi_select(self._pollen_types),
+                        CONF_POLLEN, default=list(self._pollen_list.keys())
+                    ): cv.multi_select(self._pollen_list),
                 }
             ),
         )
 
-    async def _fetch_pollen_data(self, init_info: dict[str, Any], user_input: dict[str, Any] | None = None) -> None:
+    async def _fetch_pollen_data(
+        self, init_info: dict[str, Any], user_input: dict[str, Any] | None = None
+    ) -> None:
         """Fetch pollen data from the API."""
         if CONF_API_KEY not in init_info:
             raise KeyError(f"Missing {CONF_API_KEY} in configuration")
@@ -121,7 +117,9 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         api_key = init_info[CONF_API_KEY]
         latitude = init_info[CONF_LATITUDE]
         longitude = init_info[CONF_LONGITUDE]
-        language = user_input.get(CONF_LANGUAGE, DEFAULT_LANGUAGE) if user_input else init_info.get(CONF_LANGUAGE, DEFAULT_LANGUAGE)
+        language = init_info[CONF_LANGUAGE]
+
+        self._init_info = init_info.copy()
 
         pollen_data = await fetch_pollen_data(
             api_key=api_key,
@@ -131,21 +129,12 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             days=1,
         )
 
-        self._init_info = init_info.copy()
-        self._init_info[CONF_LANGUAGE] = language
-        self._pollen_categories = [
-            item["displayName"]
+        self._pollen_categories_list = {
+            item["code"]: item["displayName"]
             for item in pollen_data["dailyInfo"][0]["pollenTypeInfo"]
-        ]
-        self._pollen_types = [
-            item["displayName"]
+        }
+
+        self._pollen_list = {
+            item["code"]: item["displayName"]
             for item in pollen_data["dailyInfo"][0]["plantInfo"]
-        ]
-        self._pollen_categories_codes = [
-            item["code"]
-            for item in pollen_data["dailyInfo"][0]["pollenTypeInfo"]
-        ]
-        self._pollen_types_codes = [
-            item["code"]
-            for item in pollen_data["dailyInfo"][0]["plantInfo"]
-        ]
+        }
