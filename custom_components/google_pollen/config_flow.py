@@ -107,6 +107,51 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             ),
         )
 
+    async def async_step_reconfigure(
+        self, user_input: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
+        """Handle the reconfigure step."""
+        errors = {}
+
+        # Initialize self._init_info with the current entry data if not already set
+        if not self._init_info:
+            self._init_info = dict(self.hass.config_entries.async_get_entry(self.context["entry_id"]).data)
+
+        # Fetch pollen data to populate self._pollen_categories and other attributes
+        await self._fetch_pollen_data(self._init_info, user_input)
+
+        if user_input is not None:
+            _LOGGER.debug("Reconfiguring with: %s", user_input)
+
+         # Map stored codes back to display names for default values
+        selected_categories = [
+            code
+            for code in self._init_info.get(CONF_POLLEN_CATEGORIES, [])
+            if code in self._pollen_categories_list
+        ]
+
+        selected_pollen = [
+            code
+            for code in self._init_info.get(CONF_POLLEN, [])
+            if code in self._pollen_list
+        ]
+
+        return self.async_show_form(
+            step_id="reconfigure",
+            data_schema=vol.Schema(
+                {
+                    #vol.Optional(CONF_LANGUAGE, default=self._init_info.get(CONF_LANGUAGE, DEFAULT_LANGUAGE)): cv.language,
+                    vol.Required(
+                        CONF_POLLEN_CATEGORIES, default=selected_categories
+                    ): cv.multi_select(self._pollen_categories_list),
+                    vol.Required(
+                        CONF_POLLEN, default=selected_pollen
+                    ): cv.multi_select(self._pollen_list),
+                }
+            ),
+            errors=errors,
+        )
+
     async def _fetch_pollen_data(
         self, init_info: dict[str, Any], user_input: dict[str, Any] | None = None
     ) -> None:
