@@ -261,9 +261,8 @@ The last update show on the entity states is the last time the entity changed va
 ### Not possible to change language after setting up a "service"/location
 If you want to change the language of the pollen info, you have to delete the "service"/location and re-add it. The entity names should normally be created with the same names as before, so all dashboards/automations should not be affected.
 
-### Not possible to add/remove pollen types/categories (aka "reconfigure") after setting up a "service"/location
-I've been trying to add `async_step_reconfigure` (like described [here](https://developers.home-assistant.io/docs/core/integration-quality-scale/rules/reconfiguration-flow/)), but have not been able to make it work. It's the combination of the APIs "code-name" for the pollen types/categories and the localized "display name" that seems to be causing some issues I haven't been able to figure out. 
-Currently, just delete the service/location and re-add it if you want to select more or less pollen types/categories. 
+### After reconfigure, if removing a pollen type/category, the entity isn't deleted
+Simply delete it manually after reconfigure.
 
 ### The entity IDs are localized
 The entities are given IDs like "sensor.google_pollen_<pollen-type>", but with "pollen type" localized to the language selected. This means that the IDs are different per language and that it's not easy to copy/paste a dashboard card between languages since the IDs are different. The best would be that the IDs are always named after the English name, but that the display name is localized. This is on my todo-list.
