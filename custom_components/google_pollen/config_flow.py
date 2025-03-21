@@ -121,7 +121,41 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         await self._fetch_pollen_data(self._init_info, user_input)
 
         if user_input is not None:
-            _LOGGER.debug("Reconfiguring with: %s", user_input)
+            # Update _init_info with the new selections
+            self._init_info[CONF_POLLEN_CATEGORIES] = user_input[CONF_POLLEN_CATEGORIES]
+            self._init_info[CONF_POLLEN] = user_input[CONF_POLLEN]
+
+            # Handle addition and removal of entities
+            current_categories = set(self._init_info.get(CONF_POLLEN_CATEGORIES, []))
+            new_categories = set(user_input[CONF_POLLEN_CATEGORIES])
+            removed_categories = current_categories - new_categories
+            added_categories = new_categories - current_categories
+
+            current_pollen = set(self._init_info.get(CONF_POLLEN, []))
+            new_pollen = set(user_input[CONF_POLLEN])
+            removed_pollen = current_pollen - new_pollen
+            added_pollen = new_pollen - current_pollen
+
+            # Remove entities for deselected categories and pollen
+            for category in removed_categories:
+                await self.hass.config_entries.async_remove(category)
+            for pollen in removed_pollen:
+                await self.hass.config_entries.async_remove(pollen)
+
+            # Add entities for newly selected categories and pollen
+            for category in added_categories:
+                await self.hass.config_entries.async_add(category)
+            for pollen in added_pollen:
+                await self.hass.config_entries.async_add(pollen)
+
+             # Update the configuration entry with the new selections
+            self.hass.config_entries.async_update_entry(
+                self.hass.config_entries.async_get_entry(self.context["entry_id"]),
+                data=self._init_info,
+            )
+
+            return self.async_update_reload_and_abort(self.hass.config_entries.async_get_entry(self.context["entry_id"]), reason="reconfigured")
+
 
          # Map stored codes back to display names for default values
         selected_categories = [
