@@ -51,7 +51,8 @@ Simply add the integration and fill out the details:
 - `api_key`: Your API key for the Google Pollen API.
 - `latitude`: Latitude of the location you want to monitor (defaults to your configured home latitude).
 - `longitude`: Longitude of the location you want to monitor (defaults to your configured home longitude).
-- `language`: (Optional) Language code for the data (default is `en`).
+- `language`: Language code for the data 
+.
 
 You'll then be asked to select the pollen categories and pollen types you want to add entities for. Please note that to add/remove entities later, you have to delete the service/location and re-add it (no "reconfigure"-option available)!
 
