@@ -75,7 +75,7 @@ To obtain an API key for the Google Pollen API, follow these steps:
 
 ### Devices/entities
 
-* For each location/service, 19 entities will be created, one for each pollen type.
+* For each location/service, you can tick to create entities for all the categories/types that are available for the given location.
 * The displayname of the entities will be set to the displayname that the Google Pollen API returns (according to the language configured when adding the location).
 * The state of each entity is the text representation of the Universal Pollen Index (UPI) for today. In addition, the numeric UPI (0-5) for today, tomorrow, day 3 and day 4 are available as attributes on each entity.
 
