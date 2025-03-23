@@ -2,6 +2,7 @@
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/svenove/home-assistant-google-pollen/hassfest.yaml)
 ![GitHub issue custom search in repo](https://img.shields.io/github/issues-search/svenove/home-assistant-google-pollen?query=label%3Abug%20is%3Aopen&label=bugs)
 ![GitHub Release](https://img.shields.io/github/v/release/svenove/home-assistant-google-pollen)
+![Github downloads total](https://img.shields.io/github/downloads/svenove/home-assistant-google-pollen/total)
 [![Buy me a coffee](https://img.shields.io/badge/Buy_me_a_coffee-ffdd00?logo=buy-me-a-coffee&logoColor=black&logoSize=auto)](https://www.buymeacoffee.com/svenove)
 
 A Home Assistant custom component to fetch pollen data from the Google Pollen API. 
@@ -50,9 +51,10 @@ Simply add the integration and fill out the details:
 - `api_key`: Your API key for the Google Pollen API.
 - `latitude`: Latitude of the location you want to monitor (defaults to your configured home latitude).
 - `longitude`: Longitude of the location you want to monitor (defaults to your configured home longitude).
-- `language`: (Optional) Language code for the data (default is `en`).
+- `language`: Language code for the data 
+.
 
-You'll then be asked to select the pollen categories and pollen types you want to add entities for. Please note that to add/remove entities later, you have to delete the service/location and re-add it (no "reconfigure"-option available)!
+You'll then be asked to select the pollen categories and pollen types you want to add entities for.
 
 Tip: you can add multiple locations - perhaps one for home and one for the summer cabin?
 
@@ -73,7 +75,7 @@ To obtain an API key for the Google Pollen API, follow these steps:
 
 ### Devices/entities
 
-* For each location/service, 19 entities will be created, one for each pollen type.
+* For each location/service, you can tick to create entities for all the categories/types that are available for the given location.
 * The displayname of the entities will be set to the displayname that the Google Pollen API returns (according to the language configured when adding the location).
 * The state of each entity is the text representation of the Universal Pollen Index (UPI) for today. In addition, the numeric UPI (0-5) for today, tomorrow, day 3 and day 4 are available as attributes on each entity.
 
@@ -170,15 +172,12 @@ series:
 
       const today = moment().startOf('day'); 
 
-      if (entity.state) {
-        data.push([today.valueOf(), entity.attributes.index_value]);
-      }
-
       data.push([today.clone().add(1, 'days').valueOf(),
       entity.attributes.tomorrow]);  data.push([today.clone().add(2,
       'days').valueOf(), entity.attributes["day 3"]]); 
       data.push([today.clone().add(3, 'days').valueOf(), entity.attributes["day
       4"]]);
+      data.push([today.valueOf(), entity.attributes.index_value]);
 
       return data;
 apex_config:
@@ -240,7 +239,7 @@ Yes, there's a limit of 5000 requests per month before you have to pay anyting (
 The integration makes one call per 4 hours + any time you restart Home Assistant. Well below 5000 requests/month!
 
 ### 2. Do I have to register a payment option, if I plan on using less than 5000 requests per month?
-Yes, but you can set a hard limit of request per day, so your sure it's never able to pass 5000 requests/month.
+Yes, but you can set a hard limit of request per day, so you're sure it's never able to pass 5000 requests/month.
 
 Steps to set a daily limit of API calls in the Google Cloud Console:
 1. Go to the Google Cloud Console.
@@ -254,15 +253,17 @@ Steps to set a daily limit of API calls in the Google Cloud Console:
 9. Click "Save" to apply the changes.
 
 ### 3. When I look at my entities, they don't seem to have updated?
-The last update show on the entity states is the last time the entity changed value. If the value is the same after updating, the time is not changed. To see the last time the entity was indeed updated, look at the "last updated"-attribute on the entity.
+The last update shown on the entity states is the last time the entity changed value. If the value is the same after updating, the time is not changed. To see the last time the entity was indeed updated, look at the "last updated"-attribute on the entity.
+
+### 4. How can I add/remove pollen categories/types for an exisiting location?
+Click the three dots behind the location and select "reconfigure". Please note that after removing a cstegory/type, you have to manually delete the entity afterwards. 
 
 ## Known issues/limitations
 ### Not possible to change language after setting up a "service"/location
 If you want to change the language of the pollen info, you have to delete the "service"/location and re-add it. The entity names should normally be created with the same names as before, so all dashboards/automations should not be affected.
 
-### Not possible to add/remove pollen types/categories (aka "reconfigure") after setting up a "service"/location
-I've been trying to add `async_step_reconfigure` (like described [here](https://developers.home-assistant.io/docs/core/integration-quality-scale/rules/reconfiguration-flow/)), but have not been able to make it work. It's the combination of the APIs "code-name" for the pollen types/categories and the localized "display name" that seems to be causing some issues I haven't been able to figure out. 
-Currently, just delete the service/location and re-add it if you want to select more or less pollen types/categories. 
+### After reconfigure, if removing a pollen type/category, the entity isn't deleted
+Simply delete it manually after reconfigure.
 
 ### The entity IDs are localized
 The entities are given IDs like "sensor.google_pollen_<pollen-type>", but with "pollen type" localized to the language selected. This means that the IDs are different per language and that it's not easy to copy/paste a dashboard card between languages since the IDs are different. The best would be that the IDs are always named after the English name, but that the display name is localized. This is on my todo-list.

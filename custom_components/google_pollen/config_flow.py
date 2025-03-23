@@ -30,10 +30,8 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     def __init__(self):
         """Initialize the config flow."""
         self._init_info = {}
-        self._pollen_categories = []
-        self._pollen_types = []
-        self._pollen_types_codes = []
-        self._pollen_categories_codes = []
+        self._pollen_list = []
+        self._pollen_categories_list = []
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
@@ -69,7 +67,7 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     vol.Required(
                         CONF_LONGITUDE, default=round(self.hass.config.longitude, 4)
                     ): cv.longitude,
-                    vol.Optional(CONF_LANGUAGE, default=DEFAULT_LANGUAGE): cv.language,
+                    vol.Required(CONF_LANGUAGE, default=DEFAULT_LANGUAGE): cv.language,
                 }
             ),
             errors=errors,
@@ -79,15 +77,11 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self, user_input: dict[str, Any] | None = None
     ) -> dict[str, Any]:
         """Handle the step to select pollen categories."""
+
         if user_input is not None:
-            self._init_info[CONF_POLLEN_CATEGORIES] = [
-                self._pollen_categories_codes[self._pollen_categories.index(category)]
-                for category in user_input[CONF_POLLEN_CATEGORIES]
-            ]
-            self._init_info[CONF_POLLEN] = [
-                self._pollen_types_codes[self._pollen_types.index(pollen)]
-                for pollen in user_input[CONF_POLLEN]
-            ]
+            self._init_info[CONF_POLLEN_CATEGORIES] = user_input[CONF_POLLEN_CATEGORIES]
+            self._init_info[CONF_POLLEN] = user_input[CONF_POLLEN]
+
             await self.async_set_unique_id(
                 f"{self._init_info[CONF_LATITUDE]}-{self._init_info[CONF_LONGITUDE]}"
             )
@@ -103,16 +97,98 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             data_schema=vol.Schema(
                 {
                     vol.Required(
-                        CONF_POLLEN_CATEGORIES, default=self._pollen_categories
-                    ): cv.multi_select(self._pollen_categories),
+                        CONF_POLLEN_CATEGORIES,
+                        default=list(self._pollen_categories_list.keys()),
+                    ): cv.multi_select(self._pollen_categories_list),
                     vol.Required(
-                        CONF_POLLEN, default=self._pollen_types
-                    ): cv.multi_select(self._pollen_types),
+                        CONF_POLLEN, default=list(self._pollen_list.keys())
+                    ): cv.multi_select(self._pollen_list),
                 }
             ),
         )
 
-    async def _fetch_pollen_data(self, init_info: dict[str, Any], user_input: dict[str, Any] | None = None) -> None:
+    async def async_step_reconfigure(
+        self, user_input: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
+        """Handle the reconfigure step."""
+        errors = {}
+
+        # Initialize self._init_info with the current entry data if not already set
+        if not self._init_info:
+            self._init_info = dict(self.hass.config_entries.async_get_entry(self.context["entry_id"]).data)
+
+        # Fetch pollen data to populate self._pollen_categories and other attributes
+        await self._fetch_pollen_data(self._init_info, user_input)
+
+        if user_input is not None:
+            # Update _init_info with the new selections
+            self._init_info[CONF_POLLEN_CATEGORIES] = user_input[CONF_POLLEN_CATEGORIES]
+            self._init_info[CONF_POLLEN] = user_input[CONF_POLLEN]
+
+            # Handle addition and removal of entities
+            current_categories = set(self._init_info.get(CONF_POLLEN_CATEGORIES, []))
+            new_categories = set(user_input[CONF_POLLEN_CATEGORIES])
+            removed_categories = current_categories - new_categories
+            added_categories = new_categories - current_categories
+
+            current_pollen = set(self._init_info.get(CONF_POLLEN, []))
+            new_pollen = set(user_input[CONF_POLLEN])
+            removed_pollen = current_pollen - new_pollen
+            added_pollen = new_pollen - current_pollen
+
+            # Remove entities for deselected categories and pollen
+            for category in removed_categories:
+                await self.hass.config_entries.async_remove(category)
+            for pollen in removed_pollen:
+                await self.hass.config_entries.async_remove(pollen)
+
+            # Add entities for newly selected categories and pollen
+            for category in added_categories:
+                await self.hass.config_entries.async_add(category)
+            for pollen in added_pollen:
+                await self.hass.config_entries.async_add(pollen)
+
+             # Update the configuration entry with the new selections
+            self.hass.config_entries.async_update_entry(
+                self.hass.config_entries.async_get_entry(self.context["entry_id"]),
+                data=self._init_info,
+            )
+
+            return self.async_update_reload_and_abort(self.hass.config_entries.async_get_entry(self.context["entry_id"]), reason="reconfigured")
+
+
+         # Map stored codes back to display names for default values
+        selected_categories = [
+            code
+            for code in self._init_info.get(CONF_POLLEN_CATEGORIES, [])
+            if code in self._pollen_categories_list
+        ]
+
+        selected_pollen = [
+            code
+            for code in self._init_info.get(CONF_POLLEN, [])
+            if code in self._pollen_list
+        ]
+
+        return self.async_show_form(
+            step_id="reconfigure",
+            data_schema=vol.Schema(
+                {
+                    #vol.Optional(CONF_LANGUAGE, default=self._init_info.get(CONF_LANGUAGE, DEFAULT_LANGUAGE)): cv.language,
+                    vol.Required(
+                        CONF_POLLEN_CATEGORIES, default=selected_categories
+                    ): cv.multi_select(self._pollen_categories_list),
+                    vol.Required(
+                        CONF_POLLEN, default=selected_pollen
+                    ): cv.multi_select(self._pollen_list),
+                }
+            ),
+            errors=errors,
+        )
+
+    async def _fetch_pollen_data(
+        self, init_info: dict[str, Any], user_input: dict[str, Any] | None = None
+    ) -> None:
         """Fetch pollen data from the API."""
         if CONF_API_KEY not in init_info:
             raise KeyError(f"Missing {CONF_API_KEY} in configuration")
@@ -120,7 +196,9 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         api_key = init_info[CONF_API_KEY]
         latitude = init_info[CONF_LATITUDE]
         longitude = init_info[CONF_LONGITUDE]
-        language = user_input.get(CONF_LANGUAGE, DEFAULT_LANGUAGE) if user_input else init_info.get(CONF_LANGUAGE, DEFAULT_LANGUAGE)
+        language = init_info[CONF_LANGUAGE]
+
+        self._init_info = init_info.copy()
 
         pollen_data = await fetch_pollen_data(
             api_key=api_key,
@@ -130,21 +208,12 @@ class GooglePollenConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             days=1,
         )
 
-        self._init_info = init_info.copy()
-        self._init_info[CONF_LANGUAGE] = language
-        self._pollen_categories = [
-            item["displayName"]
+        self._pollen_categories_list = {
+            item["code"]: item["displayName"]
             for item in pollen_data["dailyInfo"][0]["pollenTypeInfo"]
-        ]
-        self._pollen_types = [
-            item["displayName"]
+        }
+
+        self._pollen_list = {
+            item["code"]: item["displayName"]
             for item in pollen_data["dailyInfo"][0]["plantInfo"]
-        ]
-        self._pollen_categories_codes = [
-            item["code"]
-            for item in pollen_data["dailyInfo"][0]["pollenTypeInfo"]
-        ]
-        self._pollen_types_codes = [
-            item["code"]
-            for item in pollen_data["dailyInfo"][0]["plantInfo"]
-        ]
+        }
