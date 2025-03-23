@@ -239,7 +239,7 @@ Yes, there's a limit of 5000 requests per month before you have to pay anyting (
 The integration makes one call per 4 hours + any time you restart Home Assistant. Well below 5000 requests/month!
 
 ### 2. Do I have to register a payment option, if I plan on using less than 5000 requests per month?
-Yes, but you can set a hard limit of request per day, so your sure it's never able to pass 5000 requests/month.
+Yes, but you can set a hard limit of request per day, so you're sure it's never able to pass 5000 requests/month.
 
 Steps to set a daily limit of API calls in the Google Cloud Console:
 1. Go to the Google Cloud Console.
