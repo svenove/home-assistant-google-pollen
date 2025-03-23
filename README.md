@@ -253,7 +253,7 @@ Steps to set a daily limit of API calls in the Google Cloud Console:
 9. Click "Save" to apply the changes.
 
 ### 3. When I look at my entities, they don't seem to have updated?
-The last update show on the entity states is the last time the entity changed value. If the value is the same after updating, the time is not changed. To see the last time the entity was indeed updated, look at the "last updated"-attribute on the entity.
+The last update shown on the entity states is the last time the entity changed value. If the value is the same after updating, the time is not changed. To see the last time the entity was indeed updated, look at the "last updated"-attribute on the entity.
 
 ### 4. How can I add/remove pollen categories/types for an exisiting location?
 Click the three dots behind the location and select "reconfigure". Please note that after removing a cstegory/type, you have to manually delete the entity afterwards. 
