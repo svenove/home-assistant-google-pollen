@@ -171,15 +171,12 @@ series:
 
       const today = moment().startOf('day'); 
 
-      if (entity.state) {
-        data.push([today.valueOf(), entity.attributes.index_value]);
-      }
-
       data.push([today.clone().add(1, 'days').valueOf(),
       entity.attributes.tomorrow]);  data.push([today.clone().add(2,
       'days').valueOf(), entity.attributes["day 3"]]); 
       data.push([today.clone().add(3, 'days').valueOf(), entity.attributes["day
       4"]]);
+      data.push([today.valueOf(), entity.attributes.index_value]);
 
       return data;
 apex_config:
@@ -256,6 +253,9 @@ Steps to set a daily limit of API calls in the Google Cloud Console:
 
 ### 3. When I look at my entities, they don't seem to have updated?
 The last update show on the entity states is the last time the entity changed value. If the value is the same after updating, the time is not changed. To see the last time the entity was indeed updated, look at the "last updated"-attribute on the entity.
+
+### 4. How can I add/remove pollen categories/types for an exisiting location?
+Click the three dots behind the location and select "reconfigure". Please note that after removing a cstegory/type, you have to manually delete the entity afterwards. 
 
 ## Known issues/limitations
 ### Not possible to change language after setting up a "service"/location
