@@ -54,7 +54,7 @@ Simply add the integration and fill out the details:
 - `language`: Language code for the data 
 .
 
-You'll then be asked to select the pollen categories and pollen types you want to add entities for. Please note that to add/remove entities later, you have to delete the service/location and re-add it (no "reconfigure"-option available)!
+You'll then be asked to select the pollen categories and pollen types you want to add entities for.
 
 Tip: you can add multiple locations - perhaps one for home and one for the summer cabin?
 
